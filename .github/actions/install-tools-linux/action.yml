@@ -1,0 +1,119 @@
+name: 'Setup Tools on Linux Runner'
+description: 'Installs specific versions of Docker, Azure CLI, PowerShell Core, and Az Module for PowerShell on Ubuntu.'
+
+# Define inputs for versions
+inputs:
+  docker_version:
+    description: 'Docker version to install (e.g., 20.10.5)'
+    required: true
+  azure_cli_version:
+    description: 'Azure CLI version to install (e.g., 2.20.0)'
+    required: true
+  powershell_version:
+    description: 'PowerShell version to install (e.g., 7.1.3)'
+    required: true
+  az_module_version:
+    description: 'Az Module version for PowerShell (e.g., 5.8.0)'
+    required: true
+  dotnet_version:
+    description: '.NET SDK version to install (e.g., 8.0)'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Check and Install Docker
+      run: |
+        if ! command -v docker &> /dev/null || [ "$(docker --version | awk '{print $3}' | sed 's/,//')" != "${{ inputs.docker_version }}" ]; then
+          echo "Installing Docker version ${{ inputs.docker_version }}..."
+          sudo apt-get update
+          sudo apt-get install ca-certificates curl
+          sudo install -m 0755 -d /etc/apt/keyrings
+          sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+          sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+          echo \
+            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+            $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+            sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+          sudo apt-get update
+          sudo apt-get install -y docker-ce=5:${{ inputs.docker_version }}-1~ubuntu.22.04~jammy
+        else
+          echo "Docker version ${{ inputs.docker_version }} is already installed."
+        fi
+        docker --version
+      shell: bash
+
+    - name: Ensure user is in Docker group
+      run: |
+        if ! groups ${USER} | grep &>/dev/null '\bdocker\b'; then
+          sudo usermod -aG docker ${USER}
+          echo "User added to Docker group. A restart might be required for changes to take effect."
+          sudo systemctl restart docker
+        else
+          echo "User is already in the Docker group."
+        fi
+      shell: bash
+
+    - name: Check and Install DotNet
+      run: | 
+        installed_version=$(dotnet --version | awk -F. '{print $1 "." $2}')  # Get the major.minor part of the version
+        required_version=${{ inputs.dotnet_version }} | awk -F. '{print $1 "." $2}'  # Get the major.minor part of the required version
+        if ! command -v dotnet &> /dev/null || [ "$installed_version" != "$required_version" ]; then
+          echo "Installing .NET SDK version ${{ inputs.dotnet_version }}..."
+          sudo apt-get update && \
+            sudo apt-get install -y dotnet-sdk-${{ inputs.dotnet_version }}
+        else
+          echo ".NET SDK version ${{ inputs.dotnet_version }} already installed."
+        fi
+        dotnet --version
+      shell: bash
+
+    - name: Check and Install Azure CLI
+      run: |
+        if ! command -v az &> /dev/null || [ "$(az --version | grep 'azure-cli' | awk '{print $2}')" != "${{ inputs.azure_cli_version }}" ]; then
+          echo "Installing Azure CLI version ${{ inputs.azure_cli_version }}..."
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+        else
+          echo "Azure CLI version ${{ inputs.azure_cli_version }} already installed."
+        fi
+        az --version
+      shell: bash
+
+    - name: Check and Install PowerShell Core
+      run: |
+        if ! command -v pwsh &> /dev/null || [ "$(pwsh --version | awk '{print $2}')" != "${{ inputs.powershell_version }}" ]; then
+          echo "Installing PowerShell version ${{ inputs.powershell_version }}..."
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https software-properties-common
+          wget -q "https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb"
+          sudo dpkg -i packages-microsoft-prod.deb
+          sudo apt-get update
+          sudo apt-get install -y powershell=${{ inputs.powershell_version }}*
+        else
+          echo "PowerShell version ${{ inputs.powershell_version }} already installed."
+        fi
+        pwsh --version
+      shell: bash
+
+    - name: Check and Install Az Module for PowerShell
+      run: |
+        currentAzVersion=$(pwsh -Command "& {
+            \$azVersion = Get-Module -Name Az -ListAvailable | 
+                          Select-Object -Property Version | 
+                          Sort-Object -Descending Version | 
+                          Select-Object -First 1 -ExpandProperty Version;
+            if (\$azVersion -and \$azVersion.Major -and \$azVersion.Minor) {
+                '{0}.{1}' -f \$azVersion.Major, \$azVersion.Minor
+            } else {
+                'Version not found'
+            }
+        }")
+        if [ "$currentAzVersion" != "${{ inputs.az_module_version }}" ]; then
+          echo "Installing Az module version ${{ inputs.az_module_version }} for PowerShell..."
+          pwsh -Command "& { Install-Module -Name Az -RequiredVersion ${{ inputs.az_module_version }} -Force -AllowClobber -Scope CurrentUser }"
+        else
+          echo "Az module version ${{ inputs.az_module_version }} for PowerShell already installed."
+        fi
+        pwsh -Command "& { Get-Module -Name Az -ListAvailable | Select-Object -Property Name,Version }"
+      shell: bash

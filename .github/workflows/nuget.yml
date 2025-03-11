@@ -1,0 +1,86 @@
+name: Package nuget and publish
+
+on:
+  workflow_call:
+    inputs:
+      runs_on:
+        description: Platform to execute on
+        type: string
+        default: self-hosted,Ubuntu
+      base_path:
+        description: The base path of the package
+        type: string
+        default: src/Shared/Nuget
+      package_name:
+        description: The name of the package
+        required: true
+        type: string
+      solution_name:
+        description: The name of the solution
+        required_true:
+        type: string
+      force_publish:
+        description: Forces publishing the package even if not on the main branch
+        type: boolean
+        default: false
+
+env:
+  CONFIGURATION: Release
+  TEST_RESULTS_FOLDER: "TestResults-${{github.run_number}}"
+  VERSION: 1.0.${{ github.ref == 'refs/heads/main' && github.run_number || format('{0}-{1}-prerelease', github.run_number, github.run_id) }}
+  ACTIONS_STEP_DEBUG: true
+
+jobs:
+
+  build:
+    runs-on: ${{ inputs.runs_on }}
+    name: Update NuGet package
+    permissions:
+      id-token: write
+      contents: read
+      checks: write
+      packages: write
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: ${{ inputs.base_path }}
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET Core @ Latest
+        uses: actions/setup-dotnet@v4
+        with:
+          source-url: https://nuget.pkg.github.com/icwa-wa/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: |
+          dotnet build -c ${{env.CONFIGURATION}} --no-restore /p:Version=${{env.VERSION}}
+
+      - name: Test
+        run: |
+          dotnet test -c ${{env.CONFIGURATION}} --no-restore --no-build --verbosity normal --logger trx --results-directory "${{ env.TEST_RESULTS_FOLDER }}" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
+
+      - name: Generate test report
+        uses: dorny/test-reporter@v1
+        with:
+          name: test_results
+          path: '${{ env.TEST_RESULTS_FOLDER }}/*.trx'
+          reporter: dotnet-trx
+          fail-on-error: true
+          working-directory: ${{ inputs.base_path }}
+
+      - name: Generate NuGet package
+        run: |
+          dotnet pack ${{inputs.solution_name}} -c ${{env.CONFIGURATION}} --no-restore --no-build -o out /p:Version=${{env.VERSION}}
+
+      - name: Push NuGet package to GitHub registry
+        if: inputs.force_publish || github.ref == 'refs/heads/main'
+        run: |
+          dotnet nuget push **/${{ inputs.package_name }}.${{env.VERSION}}.nupkg --source "Source" -k ${{ secrets.GITHUB_TOKEN }}

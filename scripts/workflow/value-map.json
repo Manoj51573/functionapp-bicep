@@ -1,0 +1,7 @@
+[
+    {
+        "PartitionKey": "<partition value>",
+        "RowKey": "<key value>",
+        "AllowedElements": "<comma separated values>"
+    }
+]

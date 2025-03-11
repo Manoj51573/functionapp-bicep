@@ -1,0 +1,4 @@
+variables:
+  devServiceConnection: sp- sub-dulux-ais-dev-01
+  uatServiceConnection: sp- sub-dulux-ais-tst-01
+  prnServiceConnection: sp- sub-dulux-ais-prd-01

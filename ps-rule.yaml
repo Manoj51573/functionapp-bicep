@@ -1,0 +1,41 @@
+#
+# PSRule for Azure configuration
+#
+
+# Please see the documentation for all configuration options:
+# https://aka.ms/ps-rule-azure
+# https://aka.ms/ps-rule-azure/options
+# https://aka.ms/ps-rule/options
+# https://aka.ms/ps-rule-azure/bicep
+
+# Use rules from the following modules/
+include:
+  module:
+    - PSRule.Rules.Azure
+    - PSRule.Rules.CAF
+
+# Require a minimum version of modules that include referenced baseline.
+requires:
+  PSRule: "@pre >=2.9.0"
+  PSRule.Rules.Azure: "@pre >=1.33.2"
+
+configuration:
+  AZURE_BICEP_FILE_EXPANSION: true
+  AZURE_PARAMETER_FILE_EXPANSION: true
+  AZURE_BICEP_FILE_EXPANSION_TIMEOUT: 30
+
+input:
+  pathIgnore:
+    # Exclude bicepconfig.json
+    - "**/bicepconfig.json"
+    # Include Bicep files
+    - "!**/*.bicep"
+    # Exclude other files
+    - "src/modules/policy/*"
+    - "*.md"
+    - "*.example.json"
+    - "*.png"
+    - "*.PNG"
+    - "*.jsonc"
+output:
+  culture: ["en-AU"]

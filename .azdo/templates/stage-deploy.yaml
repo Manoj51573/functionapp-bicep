@@ -1,0 +1,167 @@
+parameters:
+  - name: templatePath
+    default:
+  - name: parameterPath
+    default:
+  - name: serviceConnection
+  - name: resourceGroup
+  - name: environmentName
+  - name: environmentAbbreviation
+  - name: region
+  - name: stageName
+  - name: workspaceRoot
+  - name: deploymentPool
+  - name: condition
+    default: true
+  - name: deploymentMode
+    default: Incremental
+  - name: jobTimeOutMinutes
+    default: 60
+  - name: cancelTimeOut
+    default: 5
+  - name: dependsOn
+    default:
+  - name: functionAppName
+    default: 
+  - name: logicAppName
+    default: 
+  - name: postDeployScriptPath
+    type: string
+    default:
+  - name: postDeployScriptFile
+    type: string
+    default:
+  - name: postDeployScriptArguments
+    type: object
+    default:
+
+stages:
+  - stage: ${{ parameters.stageName }}
+    displayName: ${{ parameters.environmentName }}
+    dependsOn: ${{ parameters.dependsOn }}
+    condition: ${{ parameters.condition }}
+    jobs:
+      
+    - job: resourceGroup
+      displayName: Create or Update Resource Group and Tags
+      steps:
+      - task: AzurePowerShell@5
+        displayName: Run PowerShell Script
+        inputs:
+          azureSubscription: ${{ parameters.serviceConnection }}
+          ScriptType: 'FilePath'
+          ScriptPath: '${{ parameters.workspaceRoot }}/scripts/Create-ResourceGroupWithTags.ps1'
+          ScriptArguments:
+            -Location ${{ parameters.region }} `
+            -ResourceGroupName ${{ parameters.resourceGroup }} `
+            -EnvironmentAbbreviation ${{ parameters.environmentAbbreviation }}
+          azurePowerShellVersion: 'LatestVersion'
+
+    - deployment: bicep_deploy
+      displayName: Deploy Azure Resources
+      dependsOn: resourceGroup
+      condition: succeeded()
+      pool: ${{ parameters.deploymentPool }}
+      environment: ${{ parameters.environmentName }}
+      timeoutInMinutes:  ${{ parameters.jobTimeOutMinutes }} 
+      cancelTimeoutInMinutes: ${{ parameters.cancelTimeOut }}
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - checkout: self 
+            - task: AzureCLI@2
+              displayName: Deploy Template
+              inputs:
+                azureSubscription: ${{ parameters.serviceConnection }}
+                scriptType: bash
+                scriptLocation: inlineScript
+                inlineScript: |
+                  az bicep restore --file ${{ parameters.templatePath }} --force
+                  az deployment group create \
+                    --name 'path-$(Build.BuildId)' \
+                    --resource-group ${{ parameters.resourceGroup }} \
+                    --template-file ${{ parameters.templatePath }} \
+                    --parameters ${{ parameters.parameterPath }} \
+                    --mode ${{ parameters.deploymentMode }}
+
+    - deployment: code_deploy
+      displayName: Deploy Logic and Function App Code
+      dependsOn: bicep_deploy
+      condition: succeeded()
+      variables:
+        deployFunctionApp: ${{ ne(parameters.functionAppName, '') }}
+        deployLogicApp: ${{ ne(parameters.logicAppName, '') }}
+      pool: ${{ parameters.deploymentPool }}
+      environment: ${{ parameters.environmentName }}
+      timeoutInMinutes:  ${{ parameters.jobTimeOutMinutes }} 
+      cancelTimeoutInMinutes: ${{ parameters.cancelTimeOut }}
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+
+            - download: current
+              condition: ${{ variables.deployLogicApp }}
+              displayName: Logic App Deployment Package Download
+              artifact: LogicApp
+
+            - task: AzureFunctionApp@2
+              displayName: 'Deploy logic app workflows'
+              condition: ${{ variables.deployLogicApp }}
+              inputs:
+                azureSubscription: ${{ parameters.serviceConnection }}
+                resourceGroupName: ${{ parameters.resourceGroup }}
+                deployToSlotOrASE: true
+                slotName: production
+                appType: 'functionApp'
+                appName: ${{ parameters.logicAppName }}
+                package: "$(Pipeline.Workspace)/LogicApp/build$(Build.BuildId).zip"
+                deploymentMethod: 'zipDeploy'
+
+            - download: current
+              condition: ${{ variables.deployFunctionApp }}
+              displayName: Function App Deployment Package Download
+              artifact: FunctionApp
+
+            - task: AzureFunctionApp@2
+              displayName: 'Deploy Function App'
+              condition: ${{ variables.deployFunctionApp }}
+              inputs:
+                azureSubscription: ${{ parameters.serviceConnection }}
+                resourceGroupName: ${{ parameters.resourceGroup }}
+                deployToSlotOrASE: true
+                slotName: production
+                appType: 'functionApp'
+                appName: ${{ parameters.functionAppName }}
+                package: "$(Pipeline.Workspace)/FunctionApp/build$(Build.BuildId).zip"
+                deploymentMethod: 'zipDeploy'
+
+            - checkout: self 
+            - task: AzurePowerShell@5
+              condition: ${{ endsWith(parameters.postDeployScriptFile,'ps1') }}
+              displayName: 'Run Post Deployment Scripts (PowerShell)'
+              inputs:
+                azureSubscription: ${{ parameters.serviceConnection }}
+                pwsh: false
+                scriptType: 'FilePath'
+                scriptPath: '${{ parameters.postDeployScriptPath }}'
+                scriptArguments: ${{ parameters.postDeployScriptArguments }}
+                azurePowerShellVersion: 'LatestVersion'
+            - task: AzureCLI@2
+              condition: ${{ endsWith(parameters.postDeployScriptFile,'sh') }}
+              displayName: 'Run Post Deployment Scripts (Bash)'
+              inputs:
+                azureSubscription: ${{ parameters.serviceConnection }}
+                scriptType: 'bash'
+                scriptLocation: 'scriptPath'
+                scriptPath: '${{ parameters.postDeployScriptPath }}${{ parameters.postDeployScriptFile }}'
+                scriptArguments: ${{ parameters.postDeployScriptArguments }}
+            - task: PublishTestResults@2
+              displayName: 'Publish any script test results'
+              inputs:
+                testRunTitle: 'Post Deployment Script Tests'
+                testRunner: NUnit
+                testResultsFiles: '**/TestResult.xml'
+                mergeTestResults: true
+              condition: succeededOrFailed()

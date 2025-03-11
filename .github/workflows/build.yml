@@ -1,0 +1,161 @@
+name: Build
+
+env:   
+  run_tests: true
+  dotnet_version: '8.0'
+  az_module_version: '11.5'
+  powershell_version: '7.4.1'
+  docker_version: '26.0.1'
+  azure_cli_version: '2.59.0'
+
+on:
+  workflow_call:
+    inputs:
+      run_tests:
+        description: Run tests
+        default: true
+        required: true
+        type: boolean
+      integration_name:
+        description: The name of the integration, e.g. sample-integration
+        required: true
+        type: string
+      integration_name_folder:
+        description: The name of the integration, e.g. sample-integration-ID0001
+        required: true
+        type: string
+      build_infra:
+        description: Update infrastructure
+        type: boolean
+        default: true
+      build_func: 
+        description: Update function app
+        type: boolean
+        default: true
+      build_logic: 
+        description: Update logic app
+        type: boolean
+        default: true
+      update_tools:
+        description: Update Linux Tools
+        type: boolean
+        default: true
+
+jobs:        
+  install-tools:
+    name: 'Install Linux Tools'
+    if: inputs.update_tools
+    runs-on: 
+      labels: Linux # Allows to run on any self-hosted runner with the label 'Linux'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install Tools
+      uses: ./.github/actions/install-tools-linux
+      with:
+        docker_version: ${{ env.docker_version }}
+        azure_cli_version: ${{ env.azure_cli_version }}
+        powershell_version: ${{ env.powershell_version }}
+        az_module_version: ${{ env.az_module_version }}
+        dotnet_version: ${{ env.dotnet_version }}
+
+  build-infrastructure:
+    name: Infrastructure
+    runs-on: ubuntu-latest
+    if: inputs.build_infra
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: PSRule >> Infrastructure
+        if: ${{ inputs.run_tests }}
+        continue-on-error: true # This is to ensure that the workflow does not stop the next step while the modules are cleaned up
+        uses: ./.github/actions/ps-rule
+        with:
+          option: 'ps-rule.yaml'
+          bicepPath: 'src/${{inputs.integration_name_folder}}/infrastructure'
+          path: ${{ env.PSRULE_DIRECTORY }}
+
+      - name: Copy files
+        run: rsync -av --exclude='build' --exclude={'.vscode/','.ps-rule/','.ps-docs/','*.md'} ./. ./build
+        working-directory: ./
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: infrastructure
+          path: ./build
+
+  build-function-app:
+    name: Function App
+    needs:
+      - install-tools
+    runs-on: 
+      labels: Linux # Allows to run on any self-hosted runner with the label 'Linux'
+    if: always() && !cancelled() && !failure() && inputs.build_func
+    env:
+      configuration: Release
+      publish_output_folder: publishoutput
+      functionapp_artifact_name: 'functionapp'
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: ${{ format('src/{0}/function', inputs.integration_name_folder) }}
+    permissions:
+      id-token: write
+      contents: read
+      checks: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration ${{ env.configuration }} --no-restore
+
+      - name: Test
+        if: ${{ inputs.run_tests }}
+        run: dotnet test --configuration ${{ env.configuration }} --no-restore --no-build --verbosity normal --logger trx --results-directory "TestResults-${{ env.dotnet_version }}" /p:CollectCoverage=true
+
+      - name: Generate test report
+        uses: dorny/test-reporter@v1
+        if: ${{ inputs.run_tests }}
+        with:
+          name: test_results
+          path: 'TestResults-${{ env.dotnet_version }}/*.trx'
+          reporter: dotnet-trx
+          fail-on-error: true
+          working-directory: ${{ format('src/{0}/function', inputs.integration_name_folder) }}
+
+      - name: Publish
+        run: dotnet publish --configuration ${{ env.configuration }} --property:PublishDir=../${{ env.publish_output_folder }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.functionapp_artifact_name}}
+          path: ${{ env.azure_functionapp_base_path }}/${{ env.publish_output_folder }}/**/*.*
+
+  build-logic-app:
+    name: Logic App
+    runs-on: ubuntu-latest
+    if: inputs.build_logic
+    env:
+      logicapp_artifact_name: 'logicapp'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Easy Zip Files
+        uses: vimtor/action-zip@v1
+        with:
+          dest: ${{ github.run_id }}.zip
+          files: ${{ format('src/{0}/workflow', inputs.integration_name_folder) }}/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.logicapp_artifact_name}}
+          path: ${{ github.run_id }}.zip

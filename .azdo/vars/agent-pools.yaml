@@ -1,0 +1,4 @@
+variables:
+  devAgentPool: ais-dev-pool
+  uatAgentPool: ais-tst-pool
+  prdAgentPool: ais-prd-pool

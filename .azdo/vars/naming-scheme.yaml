@@ -1,0 +1,6 @@
+variables:
+  regionAbbreviation: ae
+  regionLongName: australiaeast
+  resoureGroupPrefix: arg-ae-ais
+  logicAppNamePrefix: lap-ae-ais
+  functionAppNamePrefix: fun-ae-ais

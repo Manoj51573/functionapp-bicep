@@ -1,0 +1,158 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      runs_on:
+        description: Platform to execute on
+        type: string
+        required: true
+      environment:
+        description: The environment name
+        required: true
+        type: string
+      subscriptionId:
+        description: Azure subscription ID
+        required: true
+        type: string
+      resourcegroup:
+        description: Azure resource group
+        required: true
+        type: string
+      integration_name:
+        description: The name of the integration, e.g. sample-integration
+        required: true
+        type: string
+      integration_name_folder:
+        description: The name of the integration, e.g. sample-integration-ID0001
+        required: true
+        type: string
+      dotnet_version:
+        description: Version of dotnet to use
+        type: string
+        default: 8.0.x
+      run_tests:
+        description: Run tests
+        type: boolean
+        default: true
+      functionapp_artifact_name:
+        description: The name of the artifact to upload
+        type: string
+        default: functionapp
+      azure_functionapp_name_fmt:
+        description: Function App name format, e.g. func-sample-integration-auea-{0} where {0} will be replaced by the environment name
+        type: string
+        required: true
+      slot:
+        description: The name of the Azure Function slot to publish to
+        type: string
+        default: production
+      logicapp_artifact_name:
+        description: The name of the artifact to upload
+        type: string
+        default: logicapp
+      azure_logicapp_name_fmt:
+        description: Logic App name format, e.g. aue-{0}-logic-sample-integration where {0} will be replaced by the environment name
+        type: string
+        required: true
+      infrastructure_artifact_name:
+        description: The name of the artifact to upload
+        type: string
+        default: infrastructure
+      update_infra:
+        description: Update infrastructure
+        type: boolean
+        default: true
+      update_func: 
+        description: Update function app
+        type: boolean
+        default: true
+      update_logic: 
+        description: Update logic app
+        type: boolean
+        default: true
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AZURE_RG: ${{ inputs.resourcegroup }}
+  INFRA_PATH: src/${{ inputs.integration_name_folder }}/infrastructure/
+
+jobs:
+  deploy:
+    name: Deploy ${{inputs.integration_name}}
+    runs-on: ${{ inputs.runs_on }}
+    env: 
+      azure_logicapp_base_path: ${{ format('src/{0}/workflow', inputs.integration_name) }}
+      download_folder: build-art
+    environment: ${{inputs.integration_name}}_${{ inputs.environment }}
+
+    steps:
+      - name: Download ${{ inputs.infrastructure_artifact_name }} artifact
+        if: inputs.update_infra
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.infrastructure_artifact_name }}
+
+      - name: Download ${{ inputs.functionapp_artifact_name }} artifact
+        if: inputs.update_func
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.functionapp_artifact_name }}
+          path: output
+
+      - name: Download ${{ inputs.logicapp_artifact_name }} artifact
+        if: ${{ inputs.update_logic }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.logicapp_artifact_name }}
+          path: ${{ env.download_folder }}
+    
+      - name: Log into Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Azure Infrastructure
+        if: inputs.update_infra
+        run: |
+            az bicep upgrade
+            az bicep build-params --file main.${{ inputs.environment }}.bicepparam
+
+            echo "Template file path: ${{ env.INFRA_PATH }}main.${{ inputs.environment }}.json"
+            echo "Bicep file path: ${{ env.INFRA_PATH }}main.bicep"
+
+            az deployment group create \
+              --verbose \
+              --name deploy-${{ github.run_id }} \
+              --subscription ${{ inputs.subscriptionId }} \
+              --resource-group ${{ env.AZURE_RG }} \
+              --template-file ${{ env.INFRA_PATH }}main.bicep \
+              --parameters @${{ env.INFRA_PATH }}main.${{ inputs.environment }}.json \
+              ${{ secrets.INFRA_ADDITIONAL_DEPLOYMENT_PARAMS }}
+
+      - name: Publish Azure Function App
+        if: inputs.update_func
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ format(inputs.azure_functionapp_name_fmt, inputs.environment) }}
+          slot-name: ${{ inputs.slot }}
+          package: output
+
+      - name: Apply Application Settings
+        if: inputs.update_func
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: ${{ format(inputs.azure_functionapp_name_fmt, inputs.environment) }}
+          slot-name: ${{ inputs.slot }}
+          app-settings-json: ${{ secrets.APP_SETTINGS }}
+          connection-strings-json: ${{ secrets.CONNECTION_STRINGS }}
+          
+      - name: Publish Azure Logic App
+        if: inputs.update_logic
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ format(inputs.azure_logicapp_name_fmt, inputs.environment) }}
+          package: ${{ env.download_folder }}/${{ github.run_id }}.zip

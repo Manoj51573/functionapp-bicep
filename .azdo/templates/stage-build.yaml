@@ -1,0 +1,64 @@
+parameters:
+  - name: templateName
+    default: main.bicep
+  - name: templatePath
+  - name: serviceConnection
+  - name: stageName
+    default: 'integration_build'
+  - name: functionAppBuildPath
+    default:
+  - name: logicAppBuildPath
+    default:
+
+stages:
+  - stage: ${{ parameters.stageName }}
+    displayName: Build Integration Codebases
+    variables:
+      buildFunctionApps: ${{ ne(parameters.functionAppBuildPath, '') }}
+      buildLogicApps: ${{ ne(parameters.logicAppBuildPath, '') }}
+    jobs:
+
+      - job: logic_app_build
+        displayName: Logic App Build
+        condition: ${{ variables.buildLogicApps }}
+        pool:
+            vmImage: 'ubuntu-latest'
+        steps:
+        - task: ArchiveFiles@2
+          displayName: Upload Logic App Code Artifact
+          inputs:
+            rootFolderOrFile: "${{ parameters.logicAppBuildPath }}"
+            includeRootFolder: false
+            archiveFile: "$(Build.SourcesDirectory)/build$(Build.BuildId).zip"
+        - publish: "$(Build.SourcesDirectory)/build$(Build.BuildId).zip"
+          displayName: Artifact Publish
+          artifact: LogicApp
+      
+      - job: function_app_build
+        displayName: Function App Build
+        condition: ${{ variables.buildFunctionApps }}
+        pool:
+            vmImage: 'ubuntu-latest'
+        steps:
+        - script: |
+            dotnet restore
+            dotnet build --configuration Release
+          workingDirectory: '${{ parameters.functionAppBuildPath }}'
+        - task: DotNetCoreCLI@2
+          inputs:
+            command: publish
+            arguments: '--configuration Release --output publish_output'
+            projects: '${{ parameters.functionAppBuildPath }}/*.csproj'
+            publishWebProjects: false
+            modifyOutputPath: false
+            zipAfterPublish: false
+        - task: ArchiveFiles@2
+          displayName: Upload Function App Code Artifact
+          inputs:
+            rootFolderOrFile: "$(System.DefaultWorkingDirectory)/publish_output"
+            includeRootFolder: false
+            archiveFile: "$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip"
+        - task: PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip'
+            artifactName: FunctionApp

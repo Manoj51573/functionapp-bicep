@@ -1,0 +1,44 @@
+pr: none
+trigger:
+  branches:
+    include:
+      - main
+      - feature/*
+
+variables:
+- template: vars/naming-scheme.yaml
+- template: vars/service-connections.yaml
+- template: vars/agent-pools.yaml
+- name: integrationSuffix
+  value: 'int01'
+- name: integrationPath
+  value: $(Build.SourcesDirectory)/src/sample-integration
+
+stages:
+  - template: templates/stage-build.yaml
+    parameters:
+      stageName: 'integration_build'
+      templatePath: $(integrationPath)/infrastructure
+      serviceConnection: ${{ variables.devServiceConnection }}
+      logicAppBuildPath: $(integrationPath)/workflow/
+      functionAppBuildPath: $(integrationPath)/function/
+
+  - template: templates/stage-deploy.yaml
+    parameters:
+      templatePath: $(integrationPath)/infrastructure/main.bicep
+      parameterPath: $(integrationPath)/infrastructure/main.dev.bicepparam
+      dependsOn: 'integration_build'
+      condition: succeeded()
+      deploymentPool: ${{ variables.devAgentPool }}
+      workspaceRoot: $(Build.SourcesDirectory)
+      serviceConnection: ${{ variables.devServiceConnection }}
+      stageName: dev
+      environmentName: Development
+      environmentAbbreviation: dev
+      jobTimeOutMinutes: 20
+      region: ${{ variables.regionLongName }}
+      resourceGroup: '$(resoureGroupPrefix)-dev-$(integrationSuffix)'
+      logicAppName: '$(logicAppNamePrefix)-dev-$(integrationSuffix)'
+      functionAppName: '$(functionAppNamePrefix)-dev-$(integrationSuffix)'
+      postDeployScriptPath: $(integrationPath)/scripts/
+      postDeployScriptFile: 'post-deploy.sh'

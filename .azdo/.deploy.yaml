@@ -1,0 +1,68 @@
+pr: none
+trigger:
+  branches:
+    include:
+      - main
+      - feature/*
+
+variables:
+- template: vars/naming-scheme.yaml
+- template: vars/service-connections.yaml
+- template: vars/agent-pools.yaml
+- name: integrationSuffix
+  value: '<integration-suffix>'
+- name: integrationPath
+  value: $(Build.SourcesDirectory)/src/<integration-suffix>
+
+stages:
+  - template: templates/stage-build.yaml
+    parameters:
+      stageName: 'integration_build'
+      templatePath: $(integrationPath)/infrastructure
+      serviceConnection: ${{ variables.devServiceConnection }}
+      logicAppBuildPath: $(integrationPath)/workflow/
+
+  - template: templates/stage-deploy.yaml
+    parameters:
+      parameterPath: $(infraPath)\parameters.dev.json
+      dependsOn: 'integration_build'
+      condition: succeeded()
+      deploymentPool: ${{ variables.devAgentPool }}
+      workspaceRoot: $(Build.SourcesDirectory)
+      serviceConnection: ${{ variables.devServiceConnection }}
+      stageName: dev
+      environmentName: Development
+      jobTimeOutMinutes: 20
+      resourceGroup: 'arg-ae-ais-dev-$(integrationSuffix)'
+      logicAppName: 'lap-ae-ais-dev-$(integrationSuffix)'
+      functionAppName: 'fun-ae-ais-dev-$(integrationSuffix)'
+  
+  - template: templates/stage-deploy.yaml
+    parameters:
+      parameterPath: $(infraPath)\parameters.uat.json
+      dependsOn: 'dev'
+      condition: succeeded()
+      deploymentPool: ${{ variables.uatAgentPool }}
+      workspaceRoot: $(Build.SourcesDirectory)
+      serviceConnection: ${{ variables.uatServiceConnection }}
+      stageName: tst
+      jobTimeOutMinutes: 20
+      environmentName: Test
+      resourceGroup: 'arg-ae-ais-uat-$(integrationSuffix)'
+      logicAppName: 'lap-ae-ais-uat-$(integrationSuffix)'
+      functionAppName: 'fun-ae-ais-uat-$(integrationSuffix)'
+
+  - template: templates/stage-deploy.yaml
+    parameters:
+      parameterPath: $(infraPath)\parameters.prd.json
+      dependsOn: 'tst'
+      condition: succeeded()
+      deploymentPool: ${{ variables.prdAgentPool }}
+      workspaceRoot: $(Build.SourcesDirectory)
+      serviceConnection: ${{ variables.prdServiceConnection }}
+      stageName: prd
+      environmentName: Production
+      jobTimeOutMinutes: 20
+      resourceGroup: 'arg-ae-ais-prd-$(integrationSuffix)'
+      logicAppName: 'lap-ae-ais-prd-$(integrationSuffix)'
+      functionAppName: 'fun-ae-ais-prd-$(integrationSuffix)'

@@ -1,0 +1,73 @@
+name: Build - Sample Integration
+
+on:
+    pull_request:
+      paths:
+        - src/sample-integration/**
+      branches:
+        - main
+        - feature/*
+    workflow_dispatch:
+
+env: 
+  integration_name: sample-integration
+  integration_name_folder: sample-integration
+
+jobs:
+  changes:
+    name: 'Detect code changes'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      infrastructure: ${{ steps.filter.outputs.infrastructure }}
+      function: ${{ steps.filter.outputs.functionapp }}
+      logicapp: ${{ steps.filter.outputs.logicapp }}
+      github: ${{ steps.filter.outputs.github }}
+      integration_name: ${{ steps.integration.outputs.integration_name }}
+      integration_name_folder: ${{ steps.integration.outputs.integration_name_folder }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Check for changes in paths src/${{env.integration_name_folder}}/x
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          base: ${{ github.ref }}
+          filters: |
+            infrastructure: 
+              - 'src/${{env.integration_name_folder}}/infrastructure/**'
+            functionapp:
+              - 'src/${{env.integration_name_folder}}/function/**'
+            logicapp:
+              - 'src/${{env.integration_name_folder}}/workflow/**'
+            github:
+              - '.github/**'
+      
+      - name: Set integration name outputs
+        id: integration
+        run: | 
+          echo 'integration_name=${{env.integration_name}}' >> $GITHUB_OUTPUT
+          echo 'integration_name_folder=${{env.integration_name_folder}}' >> $GITHUB_OUTPUT
+
+  build:
+    name: Build and Test
+    uses: ./.github/workflows/build.yml
+    concurrency: 'build'
+    needs:
+      - changes
+    permissions: 
+      id-token: write
+      contents: read  
+      checks: write  
+    with:
+      integration_name: ${{ needs.changes.outputs.integration_name }}
+      integration_name_folder: ${{ needs.changes.outputs.integration_name_folder }}
+      run_tests: true
+      build_infra: ${{ needs.changes.outputs.infrastructure == 'true' }}
+      build_func: ${{ needs.changes.outputs.function == 'true' }}
+      build_logic: ${{ needs.changes.outputs.logic == 'true' }}
+      update_tools:  ${{ needs.changes.outputs.github == 'true' }}
+    secrets: inherit
