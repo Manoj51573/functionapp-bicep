@@ -2,7 +2,7 @@
 
 The Insight Integration Pattern Template provides a template for developing integration solutions that can be deployed to an Azure Integration Services environment that has been deployed using Insight Path.
 
-Integrations built using the Pattern Template rely on two Bicep modules that are configured and deployed with Insight Path - [pattern.bicep](https://github.com/Insight-Services-APAC/azure-integration-landing-zone/blob/main/src/modules/Insight/Integration/pattern.bicep) and [landingZone.bicep](https://github.com/Insight-Services-APAC/azure-integration-landing-zone/blob/main/src/modules/Insight/Integration/landingZone.bicep). These two modules are deployed to a Bicep Registry hosted on an Azure Container Registry in the customer's environment.
+Integrations built using the Pattern Template rely on two Bicep modules that are configured and deployed with Insight Path - [pattern.bicep](https://github.com/duluxgroup/alz-azure-integrations-platform/blob/main/src/modules/Insight/Integration/pattern.bicep) and [landingZone.bicep](https://github.com/duluxgroup/alz-azure-integrations-platform/blob/main/src/modules/Insight/Integration/landingZone.bicep). These two modules are deployed to a Bicep Registry hosted on an Azure Container Registry in the customer's environment.
 
 Development is accelerated by providing a suggested folder structure, sample Azure Pipelines and reference Bicep modules.
 

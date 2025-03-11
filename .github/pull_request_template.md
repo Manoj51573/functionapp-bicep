@@ -11,6 +11,7 @@ Please select the type of change this pull request represents:
 - [ ] 🪲 Bug Fix
 - [ ] 🤩 Improvement to the IP
 - [ ] 📝 Adding a feature
+- [ ] 📝 Update Documentation
 
 ## Checklist
 
