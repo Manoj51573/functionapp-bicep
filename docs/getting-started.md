@@ -30,7 +30,7 @@ Modify the [bicepconfig.json](../bicepconfig.json) file in the root of this reps
   "moduleAliases": {
     "br": {
       "IntegrationModules": {
-        "registry": "<tbc>.azurecr.io",
+        "registry": "crdgiacprodae01.azurecr.io",
         "modulePath": "bicep/modules/integration"
       }
     }

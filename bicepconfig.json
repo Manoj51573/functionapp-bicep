@@ -2,7 +2,7 @@
   "moduleAliases": {
     "br": {
       "IntegrationModules": {
-        "registry": "<tbc>.azurecr.io",
+        "registry": "crdgiacprodae01.azurecr.io",
         "modulePath": "bicep/modules/integration"
       }
     }
