@@ -1,5 +1,5 @@
 # Business Context
-Bunnings makes up a large portion of Dulux's retail sales channel and is integrated with Dulux business systems via a process chain to provide weekly sales reports. This set of workflows ingest the flat files that Bunnings provides to Dulux into the necessary downstream systems. 
+Bunnings makes up a large portion of Dulux's retail sales channel and is integrated with Dulux business systems via a process chain to provide weekly sales reports. This set of workflows ingest the flat files that Bunnings provides to Dulux into the different downstream systems. 
 
 <br>
 
@@ -8,20 +8,23 @@ Bunnings makes up a large portion of Dulux's retail sales channel and is integra
 Solution Component | Description | Remarks
 ------ |--------- | ------
 Bunnings SFTP server| Hosting server that contains the sales reports to be fetched by Dulux | This is the **source systems** and enforces 'Dual auth with basic and key exchange'.
+SAP CI | Hosts Integration process that pulls files from bunnings SFTP server and put those in the SI file server via SFTP
 SI file server | This is the Dulux SFTP server that also acts as the file server for Dulux | All incoming files are staged here and copied across to downstream system including Local file archive, SAP Data Services server, SAP BW.
 SAP Data Services | This process initialises a list of available files located in directory 'Receive\LatestInventoryFiles\' and loads those into an Azure Data Lake.  | This process exists due to an issue Dulux were facing connecting to the Azure storage account in question, and the Data Services tool was able to overcome that with a native driver included in the software package.
-Data Engineering pipeline | This is a Azure Data Factory(ADF) that picks up the Bunnings file from the drop folder(\Bunnings_SalesOut) into Azure data lake. This pipeline orchestrates the Bunnings file, and pushes the data to the Curated layer/in synapse views. | 
+Data Engineering pipelines | This is a Azure Data Factory(ADF) that picks up the Bunnings file from the drop folder(\Bunnings_SalesOut) into Azure data lake. This pipeline process the raw file, and pushes the data to the Curated layer/in synapse views. | 
 
 
 <br>
 
 # Assumptions
-- Data provided as flat files from Bunnings, no filtering or transformations are required on the raw files.
+- Data provided as flat files from Bunnings, no filtering or transformations are required on the raw files. 
+- Only files that follow the filename pattern 'invrpt*' are fetched from the SFTP location.
 - Files are received from the Bunnings at the same time(7:30pm) every day.
-- The files are received in the same format each run and no extraneous files are received during pickup.
-- The ADF pipeline runs on a schedule.
+- The files are received in the same format each run and no extraneous files are received during pickup. Files are also received in Zip format.
+- The ADF pipelines runs on a schedule and interacts with a azure sql database.
 - No file needs to be saved as backup files in the SI file server(Path: 'F:\integrator\EDI\receive\backup\bunnings')
 - The process running in the 'SAP Data Services platform' will be removed since Logic app will copy the required files from the staged location(i.e. azure storage account residing in the Integration Landing Zone) straight to the Azure data lake storage Gen2 storage account.
+- The migration of this integration service to the new platform will be transparent to Bunnings. 
 
 <br>
 
@@ -53,19 +56,24 @@ Data Engineering pipeline | This is a Azure Data Factory(ADF) that picks up the 
 <p>
 
 - A timer triggered workflow will start the chain of execution and orchestrate the data movement process via nested workflows:
-  - The 'Retrieve files' workflow will pull in the files from bunnings SFTP and stage those in azure blob storage.
-  - The 'Copy files to SI file server' will copy all the staged files from blob storage and put the same in the SI File server as archive file (path: 'F:\CPI\Bunnings\ARCHIVE\').
-  - 'Copy file to BW system' will pull in the required set of files to SAP Business warehouse(BW) system and will triggers the designated SAP BW job via power shell script.
-  - 'Copy file to Azure Data Lake Storage' will copy the files into Azure Data Lake storage.
-  - 'Trigger ADF pipeline' workflow will invoke a ADF pipeline
-  - Finally, a workflow will clean up the stages files from the blob storage.
+  - The 'Retrieve files' workflow will pull in the files from Dulux SFTP server and stage those in azure blob storage.
+  - The 'Copy files to SI file server' workflow will copy all the staged files from blob storage and put the same in the SI File server as archive file (path: 'F:\CPI\Bunnings\ARCHIVE\').
+  - 'Copy file to BW system' workflow will push the required set of files to SAP Business warehouse(BW) system and will trigger a SAP BW job via power shell script.
+  - 'Copy file to Azure Data Lake Storage' workflow will copy the files into Azure Data Lake storage.
+  - 'Trigger ADF pipeline' workflow will orchestrate the execution of the following two ADF pipelines:
+    - It will trigger a data pipeline
+    - will keep pulling the status of the job by doing a lookup in the control database.
+    - Once the above job is complete , it will trigger the second data pipeline.
+  - Finally, a workflow will clean up the staged files from the blob storage.
 - The logic app will connect with Azure Data Lake Storage Gen2 (ADLS Gen2) account by [Azure Blob Storage connector](https://learn.microsoft.com/en-us/connectors/azureblob/) 
-- Logic app will use 'File System built-in connector' to connect with the on-premises file shares.
+- Logic app will use 'File System built-in connector' to connect with the on-premises file shares(if required).
 - Logic app will use office365 connector to send emails from b2b.support@duluxgroup.com.au.
 
 <ins>Note: </ins>
- - Some of the nested workflows can be run in a sequence or in parallel dependending on the requirement. This can be discussed in detail during the implementation stage.
- - We will use the Logic Apps PowerShell action to run a PowerShell script that calls the '.bat' file on the SI file server.
+ - Some of the nested workflows can be run in a sequence or in parallel dependending on the requirement. This will be discussed in detail during the implementation stage.
+ - We will use the Logic Apps PowerShell action to run a PowerShell script that will calls the batch file on the SI file server unless a more acceptable approach to 'call the SAP BW process' using a form of abstraction is found. The exact approach will need to be investigated before the build can commence.
+ - Recommendation is to maintain just one interface(and one protocol e.g. SFTP) with the SI file server (both to retrieve the files from bunnings as well as for the archiving).
+ - Any failure in relation to the file ingestion process  to any downstream system(e.g. invalid file or error while uploading a file) will be reported to designated email address. 
 </p>
 <br>
 
@@ -85,6 +93,9 @@ N4 | Azure blob Storage | It will be used as the staging storage where incoming 
 N5 | SI File Server | This acts as the persistent storage for Dulux where the raw files received from Bunnings SFTP are stored.
 N6 | Azure Data Lake Storage| Incoming files from bunnings are also pushed to this storage by another logic app workflow(see N1). These files are then picked up by data pipelines that pushes the data to the Curated layer/in synapse views. 
 N7 | Bunnings SFTP Server | This is the source system that publishes the sale reports in an SFTP location path. This server is operated by Bunnings and only vetted systems are granted access to it.
+N8 | SAP BW | SAP Business Warehouse system where sales files from bunnings will need to dropped followed by execution of a SAP BW process.
+N9 | Control Database | This is a azure Sql database that contains processing status of different jobs that are managed by data pipelines
+N10| SAP CI | Hosts Integration process that pulls files from bunnings SFTP server and put those in the SI file server via SFTP
 
 <br>
 
@@ -94,6 +105,7 @@ Following diagram illustrates the set of actions that will be orchestrated by th
 
 ![Workflow for Bunings Sales file Ingestion](../../.media/bunningsSalesOut/workflows.png)
 
+
 <br>
 
 ## Access and permission Requirement
@@ -102,7 +114,6 @@ Following diagram illustrates the set of actions that will be orchestrated by th
   - A service account will need to be created and a compatible office365 license needs to be assigned.
 - The managed identity of the Logic app needs to be granted required 'Role Based Access Control'(RBAC) permission to the azure data lake storage account.
 - The managed identity of the Logic app needs to be granted required 'Role Based Access Control'(RBAC) permission to execute a pipeline in the existing ADF.
-- 
 
 <br>
 
@@ -112,10 +123,10 @@ Following diagram illustrates the set of actions that will be orchestrated by th
 Source System | Source IP | Destination System| Destination IP| Destination Port | remarks
 ------ | ------ | ------| ------| ------ | ------
 Logic App| *\<ase subnet>* | Bunnings SFTP server | *\<To be confirmed >* | *\<To be confirmed by Dulux>* 
-Logic App| *\<ase subnet>* | Dulux SFTP server | *\<To be confirmed >* | 22
-Logic App| *\<ase subnet>* | Dulux SI File server | *\<To be confirmed >* | 445 *\<To be confirmed by Dulux>* 
+Logic App| *\<ase subnet>* | Dulux SI File server | *\<To be confirmed >* | 22,445 *\<To be confirmed by Dulux>* | 
 Logic App| *\<ase subnet>* | SAP BW server | *\<To be confirmed >* | *\<To be confirmed by Dulux>* 
-Logic App| *\<ase subnet>* | Azure Data Lake Storage Account | *\<To be confirmed >* | 443 | 
+Logic App| *\<ase subnet>* | Azure Data Lake Storage Account | *\<To be confirmed >* | 443 |
+Logic App| *\<ase subnet>* | Azure Sql Database | *\<To be confirmed >* | 1433 | 
 
 <br>
 
@@ -123,10 +134,10 @@ Logic App| *\<ase subnet>* | Azure Data Lake Storage Account | *\<To be confirme
 Source System | Source IP | Destination System| Destination IP| Destination Port | remarks
 ------ | ------ | ------| ------| ------ | ------
 Logic App| *\<ase subnet>* | Bunnings SFTP server | *\<To be confirmed >* | *\<To be confirmed by Dulux>* 
-Logic App| *\<ase subnet>* | Dulux SFTP server | *\<To be confirmed >* | 22
-Logic App| *\<ase subnet>* | Dulux SI File server | *\<To be confirmed >* | 445 *\<To be confirmed by Dulux>* 
+Logic App| *\<ase subnet>* | Dulux SI File server | *\<To be confirmed >* | 22,445 *\<To be confirmed by Dulux>* | 
 Logic App| *\<ase subnet>* | SAP BW server | *\<To be confirmed >* | *\<To be confirmed by Dulux>* 
-Logic App| *\<ase subnet>* | Azure Data Lake Storage Account | *\<To be confirmed >* | 443 | 
+Logic App| *\<ase subnet>* | Azure Data Lake Storage Account | *\<To be confirmed >* | 443 |
+Logic App| *\<ase subnet>* | Azure Sql Database | *\<To be confirmed >* | 1433 | 
 
 <br>
 
@@ -134,10 +145,10 @@ Logic App| *\<ase subnet>* | Azure Data Lake Storage Account | *\<To be confirme
 Source System | Source IP | Destination System| Destination IP| Destination Port | remarks
 ------ | ------ | ------| ------| ------ | ------
 Logic App| *\<ase subnet>* | Bunnings SFTP server | *\<To be confirmed >* | *\<To be confirmed by Dulux>* 
-Logic App| *\<ase subnet>* | Dulux SFTP server | *\<To be confirmed >* | 22
-Logic App| *\<ase subnet>* | Dulux SI File server | *\<To be confirmed >* | 445 *\<To be confirmed by Dulux>* 
+Logic App| *\<ase subnet>* | Dulux SI File server | *\<To be confirmed >* | 22,445 *\<To be confirmed by Dulux>* | 
 Logic App| *\<ase subnet>* | SAP BW server | *\<To be confirmed >* | *\<To be confirmed by Dulux>* 
-Logic App| *\<ase subnet>* | Azure Data Lake Storage Account | *\<To be confirmed >* | 443 | 
+Logic App| *\<ase subnet>* | Azure Data Lake Storage Account | *\<To be confirmed >* | 443 |
+Logic App| *\<ase subnet>* | Azure Sql Database | *\<To be confirmed >* | 1433 | 
 
 <br>
 
