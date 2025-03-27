@@ -22,12 +22,12 @@ module mainDeployment 'br/IntegrationModules:pattern:v1.0.5' = {
     platform: configuration.outputs.platform
     env: env
     logicApp: {
-      name: 'lap-ae-ais-${env}-${intid}'
+      name: 'logic-ae-ais-${env}-${intid}'
       appServicePlan: landingZone.appServiceName
       appSettings: logicAppSettings
     }
     functionApp: {
-      name: 'fap-ae-eip-${env}-${intid}'
+      name: 'func-ae-eip-${env}-${intid}'
       appServicePlan: landingZone.appServiceName
       appSettings: functionAppSettings
       workerRuntime: 'dotnet-isolated'

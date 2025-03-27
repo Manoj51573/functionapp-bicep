@@ -59,7 +59,7 @@ Over time we will build up the samples folder with examples of how to configure 
 
 ```bicep
 logicApp: {
-  name: 'lap-ae-ais-${env}-${integrationSuffix}'
+  name: 'logic-ae-ais-${env}-${integrationSuffix}'
   appServicePlan: landingZone.appServiceName
   appSettings: logicAppSettings
   tags: tags
@@ -70,7 +70,7 @@ logicApp: {
 
 ```bicep
 functionApp: {
-  name: 'fun-ae-ais-${env}-${integrationSuffix}'
+  name: 'func-ae-ais-${env}-${integrationSuffix}'
   appServicePlan: landingZone.appServiceName
   appSettings: functionAppSettings
   workerRuntime: 'dotnet-isolated'

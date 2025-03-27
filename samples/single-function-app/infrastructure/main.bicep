@@ -14,14 +14,14 @@ var landingZone = configuration.outputs.landingZone
 
 // Integration Pattern
 module mainDeployment 'br/IntegrationModules:pattern:v1.0.5' = {
-  name: 'fap-int-deploy-${intid}'
+  name: 'func-int-deploy-${intid}'
   params: {
     integrationSuffix: intid
     landingZone: landingZone
     platform: configuration.outputs.platform
     env: env
     functionApp: {
-      name: 'fap-ae-ais-${env}-${intid}'
+      name: 'func-ae-ais-${env}-${intid}'
       appServicePlan: landingZone.appServiceName
       appSettings: functionAppSettings
       workerRuntime: 'dotnet-isolated'

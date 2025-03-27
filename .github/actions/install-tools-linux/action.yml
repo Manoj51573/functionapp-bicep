@@ -22,38 +22,38 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Check and Install Docker
-      run: |
-        if ! command -v docker &> /dev/null || [ "$(docker --version | awk '{print $3}' | sed 's/,//')" != "${{ inputs.docker_version }}" ]; then
-          echo "Installing Docker version ${{ inputs.docker_version }}..."
-          sudo apt-get update
-          sudo apt-get install ca-certificates curl
-          sudo install -m 0755 -d /etc/apt/keyrings
-          sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-          sudo chmod a+r /etc/apt/keyrings/docker.asc
+    # - name: Check and Install Docker
+    #   run: |
+    #     if ! command -v docker &> /dev/null || [ "$(docker --version | awk '{print $3}' | sed 's/,//')" != "${{ inputs.docker_version }}" ]; then
+    #       echo "Installing Docker version ${{ inputs.docker_version }}..."
+    #       sudo apt-get update
+    #       sudo apt-get install ca-certificates curl
+    #       sudo install -m 0755 -d /etc/apt/keyrings
+    #       sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    #       sudo chmod a+r /etc/apt/keyrings/docker.asc
 
-          echo \
-            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-            $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-            sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-          sudo apt-get update
-          sudo apt-get install -y docker-ce=5:${{ inputs.docker_version }}-1~ubuntu.22.04~jammy
-        else
-          echo "Docker version ${{ inputs.docker_version }} is already installed."
-        fi
-        docker --version
-      shell: bash
+    #       echo \
+    #         "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+    #         $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+    #         sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    #       sudo apt-get update
+    #       sudo apt-get install -y docker-ce=5:${{ inputs.docker_version }}-1~ubuntu.22.04~jammy
+    #     else
+    #       echo "Docker version ${{ inputs.docker_version }} is already installed."
+    #     fi
+    #     docker --version
+    #   shell: bash
 
-    - name: Ensure user is in Docker group
-      run: |
-        if ! groups ${USER} | grep &>/dev/null '\bdocker\b'; then
-          sudo usermod -aG docker ${USER}
-          echo "User added to Docker group. A restart might be required for changes to take effect."
-          sudo systemctl restart docker
-        else
-          echo "User is already in the Docker group."
-        fi
-      shell: bash
+    # - name: Ensure user is in Docker group
+    #   run: |
+    #     if ! groups ${USER} | grep &>/dev/null '\bdocker\b'; then
+    #       sudo usermod -aG docker ${USER}
+    #       echo "User added to Docker group. A restart might be required for changes to take effect."
+    #       sudo systemctl restart docker
+    #     else
+    #       echo "User is already in the Docker group."
+    #     fi
+    #   shell: bash
 
     - name: Check and Install DotNet
       run: | 

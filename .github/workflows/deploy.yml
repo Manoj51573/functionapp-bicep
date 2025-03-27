@@ -11,6 +11,10 @@ on:
         description: The environment name
         required: true
         type: string
+      location:
+        description: Location of the Azure resources
+        required: true
+        type: string
       subscriptionId:
         description: Azure subscription ID
         required: true
@@ -24,7 +28,7 @@ on:
         required: true
         type: string
       integration_name_folder:
-        description: The name of the integration, e.g. sample-integration-ID0001
+        description: The name of the folder for that integration, e.g. sample-integration-ID0001
         required: true
         type: string
       dotnet_version:
@@ -83,11 +87,12 @@ env:
 jobs:
   deploy:
     name: Deploy ${{inputs.integration_name}}
-    runs-on: ${{ inputs.runs_on }}
+    runs-on: 
+      group: ${{ inputs.runs_on }}
     env: 
       azure_logicapp_base_path: ${{ format('src/{0}/workflow', inputs.integration_name) }}
       download_folder: build-art
-    environment: ${{inputs.integration_name}}_${{ inputs.environment }}
+    environment: ${{inputs.environment}}
 
     steps:
       - name: Download ${{ inputs.infrastructure_artifact_name }} artifact
@@ -96,30 +101,31 @@ jobs:
         with:
           name: ${{ inputs.infrastructure_artifact_name }}
 
-      - name: Download ${{ inputs.functionapp_artifact_name }} artifact
-        if: inputs.update_func
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ inputs.functionapp_artifact_name }}
-          path: output
-
-      - name: Download ${{ inputs.logicapp_artifact_name }} artifact
-        if: ${{ inputs.update_logic }}
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ inputs.logicapp_artifact_name }}
-          path: ${{ env.download_folder }}
-    
       - name: Log into Azure
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
+      
+      # - name: Checkout
+      #   uses: actions/checkout@v4
+      
+      - name: Create the resource group
+        uses: azure/powershell@v2
+        with:
+          inlineScript: ././scripts/Create-ResourceGroupWithTags.ps1 -Location ${{ inputs.location }} -ResourceGroupName ${{ env.AZURE_RG }} -EnvironmentAbbreviation ${{ inputs.environment }}
+          azPSVersion: "latest"    
+      
+      # - name: Checkout
+      #   uses: actions/checkout@v4    
+      
       - name: Deploy Azure Infrastructure
         if: inputs.update_infra
         run: |
             az bicep upgrade
-            az bicep build-params --file main.${{ inputs.environment }}.bicepparam
+            az bicep build-params --file ${{ env.INFRA_PATH }}main.${{ inputs.environment }}.bicepparam
 
             echo "Template file path: ${{ env.INFRA_PATH }}main.${{ inputs.environment }}.json"
             echo "Bicep file path: ${{ env.INFRA_PATH }}main.bicep"
@@ -132,6 +138,13 @@ jobs:
               --template-file ${{ env.INFRA_PATH }}main.bicep \
               --parameters @${{ env.INFRA_PATH }}main.${{ inputs.environment }}.json \
               ${{ secrets.INFRA_ADDITIONAL_DEPLOYMENT_PARAMS }}
+      
+      - name: Download ${{ inputs.functionapp_artifact_name }} artifact
+        if: inputs.update_func
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.functionapp_artifact_name }}
+          path: output
 
       - name: Publish Azure Function App
         if: inputs.update_func
@@ -140,19 +153,26 @@ jobs:
           app-name: ${{ format(inputs.azure_functionapp_name_fmt, inputs.environment) }}
           slot-name: ${{ inputs.slot }}
           package: output
-
-      - name: Apply Application Settings
-        if: inputs.update_func
-        uses: azure/appservice-settings@v1
+      
+      - name: Download ${{ inputs.logicapp_artifact_name }} artifact
+        if: ${{ inputs.update_logic }}
+        uses: actions/download-artifact@v4
         with:
-          app-name: ${{ format(inputs.azure_functionapp_name_fmt, inputs.environment) }}
-          slot-name: ${{ inputs.slot }}
-          app-settings-json: ${{ secrets.APP_SETTINGS }}
-          connection-strings-json: ${{ secrets.CONNECTION_STRINGS }}
-          
+          name: ${{ inputs.logicapp_artifact_name }}
+          path: ${{ env.download_folder }}
+
       - name: Publish Azure Logic App
-        if: inputs.update_logic
+        if: ${{ inputs.update_logic }}
         uses: Azure/functions-action@v1
         with:
           app-name: ${{ format(inputs.azure_logicapp_name_fmt, inputs.environment) }}
           package: ${{ env.download_folder }}/${{ github.run_id }}.zip
+
+      # - name: Checkout
+      #   uses: actions/checkout@v4
+        
+      - name: Run Post-deployment Sript
+        uses: azure/powershell@v2
+        with:
+          inlineScript: src/${{ inputs.integration_name_folder }}/scripts/post-deploy.sh
+          azPSVersion: "latest" 

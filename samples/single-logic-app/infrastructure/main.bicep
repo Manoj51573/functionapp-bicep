@@ -14,14 +14,14 @@ var landingZone = configuration.outputs.landingZone
 
 // Integration Pattern
 module mainDeployment 'br/IntegrationModules:pattern:v1.0.5' = {
-  name: 'lap-int-deploy-${intid}'
+  name: 'logic-int-deploy-${intid}'
   params: {
     integrationSuffix: intid
     landingZone: landingZone
     platform: configuration.outputs.platform
     env: env
     logicApp: {
-      name: 'lap-ae-ais-${env}-${intid}'
+      name: 'logic-ae-ais-${env}-${intid}'
       appServicePlan: landingZone.appServiceName
       appSettings: logicAppSettings
     }

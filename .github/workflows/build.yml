@@ -4,7 +4,7 @@ env:
   run_tests: true
   dotnet_version: '8.0'
   az_module_version: '11.5'
-  powershell_version: '7.4.1'
+  powershell_version: '7.5.0'
   docker_version: '26.0.1'
   azure_cli_version: '2.59.0'
 
@@ -46,7 +46,8 @@ jobs:
     name: 'Install Linux Tools'
     if: inputs.update_tools
     runs-on: 
-      labels: Linux # Allows to run on any self-hosted runner with the label 'Linux'
+      group: github-hosted-azure
+      #labels: Linux # Allows to run on any self-hosted runner with the label 'Linux'
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -62,7 +63,8 @@ jobs:
 
   build-infrastructure:
     name: Infrastructure
-    runs-on: ubuntu-latest
+    runs-on: 
+      group: github-hosted-azure
     if: inputs.build_infra
     steps:
       - name: Checkout
@@ -92,7 +94,8 @@ jobs:
     needs:
       - install-tools
     runs-on: 
-      labels: Linux # Allows to run on any self-hosted runner with the label 'Linux'
+      group: github-hosted-azure
+      #labels: Linux # Allows to run on any self-hosted runner with the label 'Linux'
     if: always() && !cancelled() && !failure() && inputs.build_func
     env:
       configuration: Release
@@ -119,7 +122,7 @@ jobs:
       - name: Test
         if: ${{ inputs.run_tests }}
         run: dotnet test --configuration ${{ env.configuration }} --no-restore --no-build --verbosity normal --logger trx --results-directory "TestResults-${{ env.dotnet_version }}" /p:CollectCoverage=true
-
+          
       - name: Generate test report
         uses: dorny/test-reporter@v1
         if: ${{ inputs.run_tests }}
@@ -137,11 +140,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.functionapp_artifact_name}}
-          path: ${{ env.azure_functionapp_base_path }}/${{ env.publish_output_folder }}/**/*.*
+          path: ${{ github.workspace }}/src/sample-integration/${{ env.publish_output_folder }}/**/*.*
 
   build-logic-app:
     name: Logic App
-    runs-on: ubuntu-latest
+    runs-on: 
+      group: github-hosted-azure
     if: inputs.build_logic
     env:
       logicapp_artifact_name: 'logicapp'

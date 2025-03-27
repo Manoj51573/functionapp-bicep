@@ -1,7 +1,7 @@
 using 'main.bicep'
 
 param env = 'dev'
-param integrationSuffix = 'int01'
+param integrationSuffix = 'sample'
 param functionAppSettings = [
   {
     name: 'APP_ENVIRONMENT_NAME'
@@ -37,9 +37,5 @@ param logicAppSettings = [
   {
     name: 'TestLogicAppSetting01'
     value: 'LogicSettingValue01'
-  }
-  {
-    name: 'TestLogicAppSetting02'
-    value: 'LogicSettingValue02'
   }
 ]

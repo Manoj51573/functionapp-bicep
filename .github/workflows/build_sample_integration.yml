@@ -7,7 +7,7 @@ on:
       branches:
         - main
         - feature/*
-    workflow_dispatch:
+    #workflow_dispatch:
 
 env: 
   integration_name: sample-integration
@@ -16,7 +16,8 @@ env:
 jobs:
   changes:
     name: 'Detect code changes'
-    runs-on: ubuntu-latest
+    runs-on: 
+      group: github-hosted-azure
     permissions:
       contents: write
       pull-requests: write
@@ -31,7 +32,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         
-      - name: Check for changes in paths src/${{env.integration_name_folder}}/x
+      - name: Check for changes in paths src/${{env.integration_name_folder}}/
         uses: dorny/paths-filter@v3
         id: filter
         with:

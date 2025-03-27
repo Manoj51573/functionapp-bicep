@@ -34,8 +34,8 @@ stages:
       environmentName: Development
       jobTimeOutMinutes: 20
       resourceGroup: 'arg-ae-ais-dev-$(integrationSuffix)'
-      logicAppName: 'lap-ae-ais-dev-$(integrationSuffix)'
-      functionAppName: 'fun-ae-ais-dev-$(integrationSuffix)'
+      logicAppName: 'logic-ae-ais-dev-$(integrationSuffix)'
+      functionAppName: 'func-ae-ais-dev-$(integrationSuffix)'
   
   - template: templates/stage-deploy.yaml
     parameters:
@@ -49,8 +49,8 @@ stages:
       jobTimeOutMinutes: 20
       environmentName: Test
       resourceGroup: 'arg-ae-ais-uat-$(integrationSuffix)'
-      logicAppName: 'lap-ae-ais-uat-$(integrationSuffix)'
-      functionAppName: 'fun-ae-ais-uat-$(integrationSuffix)'
+      logicAppName: 'logic-ae-ais-uat-$(integrationSuffix)'
+      functionAppName: 'func-ae-ais-uat-$(integrationSuffix)'
 
   - template: templates/stage-deploy.yaml
     parameters:
@@ -64,5 +64,5 @@ stages:
       environmentName: Production
       jobTimeOutMinutes: 20
       resourceGroup: 'arg-ae-ais-prd-$(integrationSuffix)'
-      logicAppName: 'lap-ae-ais-prd-$(integrationSuffix)'
-      functionAppName: 'fun-ae-ais-prd-$(integrationSuffix)'
+      logicAppName: 'logic-ae-ais-prd-$(integrationSuffix)'
+      functionAppName: 'func-ae-ais-prd-$(integrationSuffix)'

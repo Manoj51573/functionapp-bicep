@@ -14,7 +14,7 @@ param logicAppSettings array = []
 param functionAppSettings array = []
 
 // Integration Landing Zone Configuration
-module configuration 'br/IntegrationModules:landing-zone:v1.0' = {
+module configuration 'br/IntegrationModules:landing-zone:v3.0.1' = {
   name: 'configuration'
   params: {
     environment: env
@@ -24,7 +24,7 @@ module configuration 'br/IntegrationModules:landing-zone:v1.0' = {
 var landingZone = configuration.outputs.landingZone
 
 // Integration Pattern
-module mainDeployment 'br/IntegrationModules:pattern:v1.0' = {
+module mainDeployment 'br/IntegrationModules:pattern:v3.0.1' = {
   name: 'integrationDeployment-${integrationSuffix}'
   params: {
     integrationSuffix: integrationSuffix
@@ -32,16 +32,16 @@ module mainDeployment 'br/IntegrationModules:pattern:v1.0' = {
     platform: configuration.outputs.platform
     env: env
     logicApp: {
-      name: 'lap-ae-ais-${env}-${integrationSuffix}'
+      name: 'logic-ae-ais-${env}-${integrationSuffix}'
       appServicePlan: landingZone.appServiceName
       appSettings: logicAppSettings
     }
     functionApp: {
-      name: 'fun-ae-ais-${env}-${integrationSuffix}'
+      name: 'func-ae-ais-${env}-${integrationSuffix}'
       appServicePlan: landingZone.appServiceName
       appSettings: functionAppSettings
       workerRuntime: 'dotnet-isolated'
-      workerVersion: 'v6.0'
+      workerVersion: 'v8.0'
     }
   }
 }

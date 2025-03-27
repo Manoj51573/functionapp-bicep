@@ -1,10 +1,11 @@
 name: Release - Sample Integration
 
-on:
+on: 
   push:
       branches:
       - main
       - feature/*
+  workflow_dispatch: 
 
 env: 
   integration_name: sample-integration
@@ -13,7 +14,8 @@ env:
 jobs:
   changes:
     name: 'Detect code changes'
-    runs-on: ubuntu-latest
+    runs-on: 
+      group: github-hosted-azure
     permissions:
       contents: write
       pull-requests: write
@@ -28,7 +30,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         
-      - name: Check for changes in paths src/${{env.integration_name_folder}}/x
+      - name: Check for changes in paths src/${{env.integration_name_folder}}/
         uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -62,15 +64,15 @@ jobs:
       integration_name: ${{ needs.changes.outputs.integration_name }}
       integration_name_folder: ${{ needs.changes.outputs.integration_name_folder }}
       run_tests: false
-      build_infra: ${{ needs.changes.outputs.infrastructure == 'true' }}
-      build_func: ${{ needs.changes.outputs.function == 'true' }}
-      build_logic: ${{ needs.changes.outputs.logic == 'true' }}
+      build_infra: true  
+      build_func: true
+      build_logic: true
       update_tools:  ${{ needs.changes.outputs.github == 'true' }}
     secrets: inherit
 
   # If you need additional Integration Services environments, make a copy of the code block below and update at least the environmentName and integrationName for each environment.
   deploy_Dev:
-    if: always() && !cancelled() && !failure() && needs.changes.outputs.infrastructure == 'true' || needs.changes.outputs.functionapp == 'true' || needs.changes.outputs.logicapp == 'true'
+    if: always() && !cancelled() && !failure()
     name: Development
     uses: ./.github/workflows/deploy.yml
     concurrency: 'deploy'
@@ -81,80 +83,83 @@ jobs:
       contents: read
       checks: write
     with:
-      runs_on: Dev-AIS # This is the name of the self-hosted runner label
+      runs_on: github-hosted-azure # This is the name of the self-hosted runner label
       environment: 'dev'
-      subscriptionId: '43a0a102-f88d-4e99-9987-0ead14a0f6d1'
-      resourcegroup: 'AUE-DEV-ARG-Appservice'
-      integration_name: ${{ needs.changes.outputs.integration_name }}
-      integration_name_folder: ${{ needs.changes.outputs.integration_name_folder }}
+      location: 'australiaeast'
+      subscriptionId: 'd62bb41f-f4ff-43d0-8576-40b114f1b709'
+      resourcegroup: 'rg-ae-ais-dev-sample'
+      integration_name: 'sample-integration'
+      integration_name_folder: 'sample-integration'
       dotnet_version: '8.0.x'
       run_tests: true 
       functionapp_artifact_name: functionapp
-      azure_functionapp_name_fmt: 'aue-{0}-func-sample-integration'
+      azure_functionapp_name_fmt: 'func-ae-ais-{0}-sample'
       slot: 'production'
       logicapp_artifact_name: logicapp
-      azure_logicapp_name_fmt: 'aue-{0}-logic-sample-integration'
+      azure_logicapp_name_fmt: 'logic-ae-ais-{0}-sample'
       infrastructure_artifact_name: infrastructure
-      update_infra: ${{ needs.changes.outputs.infrastructure == 'true'}}
-      update_func: ${{ needs.changes.outputs.functionapp == 'true'}}
-      update_logic: ${{ needs.changes.outputs.logicapp == 'true'}}
+      update_infra: true  #${{ needs.changes.outputs.infrastructure == 'true'}}
+      update_func: true #${{ needs.changes.outputs.functionapp == 'true'}}
+      update_logic: true # ${{ needs.changes.outputs.logicapp == 'true'}}
     secrets: inherit
 
-  deploy_Tst:
-    if: always() && !cancelled() && !failure() && needs.changes.outputs.infrastructure == 'true' || needs.changes.outputs.functionapp == 'true' || needs.changes.outputs.logicapp == 'true'
-    name: Test
-    uses: ./.github/workflows/deploy.yml
-    concurrency: 'deploy'
-    needs:
-      - deploy_Dev
-    permissions:
-      id-token: write
-      contents: read
-    with:
-      runs_on: Tst-AIS # This is the name of the self-hosted runner label
-      environment: 'test'
-      subscriptionId: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-      resourcegroup: 'AUE-TST-ARG-Appservice'
-      integration_name: 'sample-integration' # Cannot use env in caller workflows so this must be a string
-      integration_name_folder: 'sample-integration-ID0001' # Cannot use env in caller workflows so this must be a string
-      dotnet_version: '8.0.x'
-      run_tests: true 
-      functionapp_artifact_name: functionapp
-      azure_functionapp_name_fmt: 'aue-{0}-func-sample-integration'
-      slot: 'production'
-      logicapp_artifact_name: logicapp
-      azure_logicapp_name_fmt: 'aue-{0}-logic-sample-integration'
-      infrastructure_artifact_name: infrastructure
-      update_infra: ${{ needs.changes.outputs.infrastructure == 'true'}}
-      update_func: ${{ needs.changes.outputs.functionapp == 'true'}}
-      update_logic: ${{ needs.changes.outputs.logicapp == 'true'}}
-    secrets: inherit
+  # deploy_Tst:
+  #   if: always() && !cancelled() && !failure() && needs.changes.outputs.infrastructure == 'true' || needs.changes.outputs.functionapp == 'true' || needs.changes.outputs.logicapp == 'true'
+  #   name: Test
+  #   uses: ./.github/workflows/deploy.yml
+  #   concurrency: 'deploy'
+  #   needs:
+  #     - deploy_Dev
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+  #   with:
+  #     runs_on: github-hosted-azure # This is the name of the self-hosted runner label
+  #     environment: 'test'
+  #     location: 'australiaeast'
+  #     subscriptionId: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+  #     resourcegroup: 'rg-ae-ais-tst-sample'
+  #     integration_name: 'sample integration' # Cannot use env in caller workflows so this must be a string
+  #     integration_name_folder: 'sample-integration' # Cannot use env in caller workflows so this must be a string
+  #     dotnet_version: '8.0.x'
+  #     run_tests: true 
+  #     functionapp_artifact_name: functionapp
+  #     azure_functionapp_name_fmt: 'func-ae-ais-{0}-sample'
+  #     slot: 'production'
+  #     logicapp_artifact_name: logicapp
+  #     azure_logicapp_name_fmt: 'logic-ae-ais-{0}-sample'
+  #     infrastructure_artifact_name: infrastructure
+  #     update_infra: ${{ needs.changes.outputs.infrastructure == 'true'}}
+  #     update_func: ${{ needs.changes.outputs.functionapp == 'true'}}
+  #     update_logic: ${{ needs.changes.outputs.logicapp == 'true'}}
+  #   secrets: inherit
 
-  deploy_PRO:
-    if: always() && !cancelled() && !failure() && needs.changes.outputs.infrastructure == 'true' || needs.changes.outputs.functionapp == 'true' || needs.changes.outputs.logicapp == 'true'
-    name: Production
-    uses: ./.github/workflows/deploy.yml
-    concurrency: 'deploy'
-    needs:
-      - deploy_Tst
-    permissions:
-      id-token: write
-      contents: read
-    with:
-      runs_on: PRO-AIS # This is the name of the self-hosted runner label
-      environment: 'production'
-      subscriptionId: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-      resourcegroup: 'AUE-PRO-ARG-Appservice'
-      integration_name: 'sample-integration' # Cannot use env in caller workflows so this must be a string
-      integration_name_folder: 'sample-integration-ID0001' # Cannot use env in caller workflows so this must be a string
-      dotnet_version: '8.0.x'
-      run_tests: true 
-      functionapp_artifact_name: functionapp
-      azure_functionapp_name_fmt: 'aue-{0}-func-sample-integration'
-      slot: 'production'
-      logicapp_artifact_name: logicapp
-      azure_logicapp_name_fmt: 'aue-{0}-logic-sample-integration'
-      infrastructure_artifact_name: infrastructure
-      update_infra: ${{ needs.changes.outputs.infrastructure == 'true'}}
-      update_func: ${{ needs.changes.outputs.functionapp == 'true'}}
-      update_logic: ${{ needs.changes.outputs.logicapp == 'true'}}
+  # deploy_PRO:
+  #   if: always() && !cancelled() && !failure() && needs.changes.outputs.infrastructure == 'true' || needs.changes.outputs.functionapp == 'true' || needs.changes.outputs.logicapp == 'true'
+  #   name: Production
+  #   uses: ./.github/workflows/deploy.yml
+  #   concurrency: 'deploy'
+  #   needs:
+  #     - deploy_Tst
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+  #   with:
+  #     runs_on: github-hosted-azure # This is the name of the self-hosted runner label
+  #     environment: 'production'
+  #     location: 'australiaeast'
+  #     subscriptionId: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+  #     resourcegroup: 'rg-ae-ais-prd-sample'
+  #     integration_name: 'sample-integration' # Cannot use env in caller workflows so this must be a string
+  #     integration_name_folder: 'sample-integration-ID0001' # Cannot use env in caller workflows so this must be a string
+  #     dotnet_version: '8.0.x'
+  #     run_tests: true 
+  #     functionapp_artifact_name: functionapp
+  #     azure_functionapp_name_fmt: 'func-ae-ais-{0}-sample'
+  #     slot: 'production'
+  #     logicapp_artifact_name: logicapp
+  #     azure_logicapp_name_fmt: 'logic-ae-ais-{0}-sample'
+  #     infrastructure_artifact_name: infrastructure
+  #     update_infra: ${{ needs.changes.outputs.infrastructure == 'true'}}
+  #     update_func: ${{ needs.changes.outputs.functionapp == 'true'}}
+  #     update_logic: ${{ needs.changes.outputs.logicapp == 'true'}}
