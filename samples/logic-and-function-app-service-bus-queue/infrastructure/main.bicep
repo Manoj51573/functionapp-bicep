@@ -31,7 +31,7 @@ module mainDeployment 'br/IntegrationModules:pattern:v1.0.5' = {
       appServicePlan: landingZone.appServiceName
       appSettings: functionAppSettings
       workerRuntime: 'dotnet-isolated'
-      workerVersion: 'v6.0'
+      workerVersion: 'v8.0'
       serviceBusQueues:[
         {
           name: 'bq-servicenow-staffnotifier-${env}-${intid}'

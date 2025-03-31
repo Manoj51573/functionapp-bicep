@@ -74,7 +74,7 @@ functionApp: {
   appServicePlan: landingZone.appServiceName
   appSettings: functionAppSettings
   workerRuntime: 'dotnet-isolated'
-  workerVersion: 'v6.0'
+  workerVersion: 'v8.0'
   tags: tags
 }
 ```
@@ -87,12 +87,12 @@ You provide the values to insert into the App Settings for both integration type
 param functionAppSettings = [
   {
     name: 'APP_ENVIRONMENT_NAME'
-    value: 'ase-ae-ais-dev-01.appserviceenvironment.net'
+    value: 'ase-ae-ais-dev-intdg.appserviceenvironment.net'
     slotSetting: false
   }
   {
     name: 'APIM_GATEWAY_NAME'
-    value: 'apim-ae-ais-dev-01.azure-api.net'
+    value: 'apim-ae-ais-dev-nnpbak.azure-api.net'
   }
 ]
 ```
@@ -111,4 +111,4 @@ To be documented.
 
 ## Deployment
 
-Azure Pipelines files are used to deploy both the underlying Azure Functions or Logic Apps resource as well as the application source code. You can see a sample for the [Sample deployment](../.azdo/sample-integration.yaml).
+Azure Pipelines files are used to deploy both the underlying Azure Functions or Logic Apps resource as well as the application source code. You can see a sample for the [Sample deployment](../.github/workflows/release_sample.yml).

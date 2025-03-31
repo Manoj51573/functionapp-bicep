@@ -9,27 +9,19 @@ param functionAppSettings = [
   }
   {
     name: 'APIM_GATEWAY_NAME'
-    value: 'apim-ae-ais-dev-01.azure-api.net'
-  }
-  {
-    name: 'SERVICE_BUS_NAMESPACE_NAME'
-    value: 'sb-ae-ais-dev-02'
+    value: 'apim-ae-ais-dev-nnpbak.azure-api.net'
   }
   {
     name: 'STORAGE_ACCOUNT_DATA_NAME'
-    value: 'stasydipdevdat02'
+    value: 'staeaisdevdatannpbak'
   }
   {
     name: 'STORAGE_ACCOUNT_TEL_NAME'
-    value: 'stasydipdevtel02'
-  }
-  {
-    name: 'KEY_VAULT_SHARED_NAME'
-    value: 'akv-ae-ais-dev-02'
+    value: 'staeaisdevlogsnnpbak'
   }
   {
     name: 'KEY_VAULT_APIM_NAME'
-    value: 'akv-ae-ais-dev-03'
+    value: 'kv-ae-ais-dev-apim'
   }
 ]
 

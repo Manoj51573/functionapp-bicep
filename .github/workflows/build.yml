@@ -42,24 +42,24 @@ on:
         default: true
 
 jobs:        
-  install-tools:
-    name: 'Install Linux Tools'
-    if: inputs.update_tools
-    runs-on: 
-      group: github-hosted-azure
-      #labels: Linux # Allows to run on any self-hosted runner with the label 'Linux'
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+  # install-tools:
+  #   name: 'Install Linux Tools'
+  #   if: inputs.update_tools
+  #   runs-on: 
+  #     group: github-hosted-azure
+  #     #labels: Linux # Allows to run on any self-hosted runner with the label 'Linux'
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v4
 
-    - name: Install Tools
-      uses: ./.github/actions/install-tools-linux
-      with:
-        docker_version: ${{ env.docker_version }}
-        azure_cli_version: ${{ env.azure_cli_version }}
-        powershell_version: ${{ env.powershell_version }}
-        az_module_version: ${{ env.az_module_version }}
-        dotnet_version: ${{ env.dotnet_version }}
+  #   - name: Install Tools
+  #     uses: ./.github/actions/install-tools-linux
+  #     with:
+  #       docker_version: ${{ env.docker_version }}
+  #       azure_cli_version: ${{ env.azure_cli_version }}
+  #       powershell_version: ${{ env.powershell_version }}
+  #       az_module_version: ${{ env.az_module_version }}
+  #       dotnet_version: ${{ env.dotnet_version }}
 
   build-infrastructure:
     name: Infrastructure
@@ -91,8 +91,8 @@ jobs:
 
   build-function-app:
     name: Function App
-    needs:
-      - install-tools
+    #needs:
+    #  - install-tools
     runs-on: 
       group: github-hosted-azure
       #labels: Linux # Allows to run on any self-hosted runner with the label 'Linux'

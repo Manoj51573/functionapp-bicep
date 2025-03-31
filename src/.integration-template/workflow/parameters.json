@@ -1,6 +1,0 @@
-{
-    "Sample": {
-        "type": "String",
-        "value": "@appsettings('SettingName')"
-    }
-}

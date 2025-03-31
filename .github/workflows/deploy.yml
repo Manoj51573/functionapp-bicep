@@ -174,5 +174,5 @@ jobs:
       - name: Run Post-deployment Sript
         uses: azure/powershell@v2
         with:
-          inlineScript: src/${{ inputs.integration_name_folder }}/scripts/post-deploy.sh
+          inlineScript: src/${{ inputs.integration_name_folder }}/scripts/post-deploy.ps1 -environmentName ${{ inputs.environment }}
           azPSVersion: "latest" 
