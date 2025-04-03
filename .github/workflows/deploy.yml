@@ -58,7 +58,7 @@ on:
       azure_logicapp_name_fmt:
         description: Logic App name format, e.g. aue-{0}-logic-sample-integration where {0} will be replaced by the environment name
         type: string
-        required: true
+        required: false
       infrastructure_artifact_name:
         description: The name of the artifact to upload
         type: string
@@ -74,7 +74,7 @@ on:
       update_logic: 
         description: Update logic app
         type: boolean
-        default: true
+        default: false
 
 permissions:
   id-token: write

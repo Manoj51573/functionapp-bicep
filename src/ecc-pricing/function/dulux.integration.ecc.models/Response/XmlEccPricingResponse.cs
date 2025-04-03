@@ -1,0 +1,181 @@
+using System;
+using System.Collections.Generic;
+using System.Xml.Serialization;
+
+namespace dulux.integration.ecc.models.response
+{
+    //[XmlRoot(ElementName = "IsOrderHeaderSet")]
+    public class XmlEccPricingResponse
+    {
+        [XmlElement(ElementName = "IsOrderHeader")]
+        public IsOrderHeader IsOrderHeader { get; set; }
+    }
+
+    public class IsOrderHeader
+    {
+        [XmlElement(ElementName = "PriceDate")]
+        public string PriceDate { get; set; }
+
+        [XmlElement(ElementName = "ReqDateH")]
+        public string ReqDateH { get; set; }
+
+        [XmlElement(ElementName = "SalesOff")]
+        public string SalesOff { get; set; }
+
+        [XmlElement(ElementName = "DistrChan")]
+        public string DistrChan { get; set; }
+
+        [XmlElement(ElementName = "CurrIso")]
+        public string CurrIso { get; set; }
+
+        [XmlElement(ElementName = "PurchNoC")]
+        public string PurchNoC { get; set; }
+
+        [XmlElement(ElementName = "SalesOrg")]
+        public string SalesOrg { get; set; }
+
+        [XmlElement(ElementName = "ItOrderSchedLinesSet")]
+        public ItOrderSchedLinesSet ItOrderSchedLinesSet { get; set; }
+
+        [XmlElement(ElementName = "RefObjKey")]
+        public string RefObjKey { get; set; }
+
+        [XmlElement(ElementName = "Division")]
+        public string Division { get; set; }
+
+        [XmlElement(ElementName = "DocType")]
+        public string DocType { get; set; }
+
+        [XmlElement(ElementName = "ItOrderItemsSet")]
+        public ItOrderItemsSet ItOrderItemsSet { get; set; }
+
+        [XmlElement(ElementName = "ItOrderPartnersSet")]
+        public ItOrderPartnersSet ItOrderPartnersSet { get; set; }
+
+        [XmlElement(ElementName = "EsSalesOrderDataSet")]
+        public EsSalesOrderDataSet EsSalesOrderDataSet { get; set; }
+    }
+
+    public class ItOrderSchedLinesSet
+    {
+        [XmlElement(ElementName = "ItOrderSchedLines")]
+        public List<ItOrderSchedLines> ItOrderSchedLines { get; set; }
+    }
+
+    public class ItOrderSchedLines
+    {
+        [XmlElement(ElementName = "SchedLine")]
+        public string SchedLine { get; set; }
+
+        [XmlElement(ElementName = "RefObjKey")]
+        public string RefObjKey { get; set; }
+
+        [XmlElement(ElementName = "ReqQty")]
+        public decimal ReqQty { get; set; }
+
+        [XmlElement(ElementName = "ItmNumber")]
+        public string ItmNumber { get; set; }
+
+        [XmlElement(ElementName = "ReqDate")]
+        public string ReqDate { get; set; }
+    }
+
+    public class ItOrderItemsSet
+    {
+        [XmlElement(ElementName = "ItOrderItems")]
+        public List<ItOrderItems> ItOrderItems { get; set; }
+    }
+
+    public class ItOrderItems
+    {
+        [XmlElement(ElementName = "Discount")]
+        public decimal Discount { get; set; }
+
+        [XmlElement(ElementName = "TotalPriceIncGST")]
+        public decimal TotalPriceIncGST { get; set; }
+
+        [XmlElement(ElementName = "CondUnit")]
+        public string CondUnit { get; set; }
+
+        [XmlElement(ElementName = "ReqQty")]
+        public decimal ReqQty { get; set; }
+
+        [XmlElement(ElementName = "SalesUnit")]
+        public string SalesUnit { get; set; }
+
+        [XmlElement(ElementName = "GST")]
+        public decimal GST { get; set; }
+
+        [XmlElement(ElementName = "Material")]
+        public string Material { get; set; }
+
+        [XmlElement(ElementName = "Plant")]
+        public string Plant { get; set; }
+
+        [XmlElement(ElementName = "NetPrice")]
+        public decimal NetPrice { get; set; }
+
+        [XmlElement(ElementName = "DocNumber")]
+        public string DocNumber { get; set; }
+
+        [XmlElement(ElementName = "Currency")]
+        public string Currency { get; set; }
+
+        [XmlElement(ElementName = "NetValue")]
+        public decimal NetValue { get; set; }
+
+        [XmlElement(ElementName = "ItmNumber")]
+        public string ItmNumber { get; set; }
+    }
+
+    public class ItOrderPartnersSet
+    {
+        [XmlElement(ElementName = "ItOrderPartners")]
+        public List<ItOrderPartners> ItOrderPartners { get; set; }
+    }
+
+    public class ItOrderPartners
+    {
+        [XmlElement(ElementName = "PartnRole")]
+        public string PartnRole { get; set; }
+
+        [XmlElement(ElementName = "PartnNumb")]
+        public string PartnNumb { get; set; }
+
+        [XmlElement(ElementName = "PartnName")]
+        public string PartnName { get; set; }
+
+        [XmlElement(ElementName = "PartnCountry")]
+        public string PartnCountry { get; set; }
+
+        [XmlElement(ElementName = "RefObjKey")]
+        public string RefObjKey { get; set; }
+
+        [XmlElement(ElementName = "ItmNumber")]
+        public string ItmNumber { get; set; }
+    }
+
+    public class EsSalesOrderDataSet
+    {
+        [XmlElement(ElementName = "EsSalesOrderData")]
+        public List<XmlEsSalesOrderData> EsSalesOrderData { get; set; }
+    }
+
+    public class XmlEsSalesOrderData
+    {
+        [XmlElement(ElementName = "GrossValHd")]
+        public decimal GrossValHd { get; set; }
+
+        [XmlElement(ElementName = "Refobjkey")]
+        public string Refobjkey { get; set; }
+
+        [XmlElement(ElementName = "TaxAmountHd")]
+        public decimal TaxAmountHd { get; set; }
+
+        [XmlElement(ElementName = "NetValHd")]
+        public decimal NetValHd { get; set; }
+
+        [XmlElement(ElementName = "CreditExposureAmt")]
+        public decimal CreditExposureAmt { get; set; }
+    }
+}

@@ -1,0 +1,103 @@
+name: Release - Get Pricing API
+
+on: 
+  push:
+      branches:
+      - main
+      - feature/*
+      paths:
+      - 'src/ecc-pricing/**'
+  workflow_dispatch: 
+
+env: 
+  integration_name: ecc-pricing
+  integration_name_folder: ecc-pricing
+
+jobs:
+  changes:
+    name: 'Detect code changes'
+    runs-on: 
+      group: github-hosted-azure
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      infrastructure: ${{ steps.filter.outputs.infrastructure }}
+      function: ${{ steps.filter.outputs.functionapp }}
+      github: ${{ steps.filter.outputs.github }}
+      integration_name: ${{ steps.integration.outputs.integration_name }}
+      integration_name_folder: ${{ steps.integration.outputs.integration_name_folder }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Check for changes in paths src/${{env.integration_name_folder}}/
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          base: ${{ github.ref }}
+          filters: |
+            infrastructure: 
+              - 'src/${{env.integration_name_folder}}/infrastructure/**'
+            functionapp:
+              - 'src/${{env.integration_name_folder}}/function/**'
+            github:
+              - '.github/**'
+      
+      - name: Set integration name outputs
+        id: integration
+        run: | 
+          echo 'integration_name=${{env.integration_name}}' >> $GITHUB_OUTPUT
+          echo 'integration_name_folder=${{env.integration_name_folder}}' >> $GITHUB_OUTPUT
+  build:
+    name: Build
+    uses: ./.github/workflows/build.yml
+    concurrency: 'build'
+    needs:
+      - changes
+    permissions: 
+      id-token: write
+      contents: read
+      checks: write    
+    with:
+      integration_name: ${{ needs.changes.outputs.integration_name }}
+      integration_name_folder: ${{ needs.changes.outputs.integration_name_folder }}
+      run_tests: false
+      build_infra: true  
+      build_func: true
+      build_logic: false
+      update_tools:  ${{ needs.changes.outputs.github == 'true' }}
+    secrets: inherit
+
+  # If you need additional Integration Services environments, make a copy of the code block below and update at least the environmentName and integrationName for each environment.
+  deploy_Dev:
+    if: always() && !cancelled() && !failure()
+    name: Development
+    uses: ./.github/workflows/deploy.yml
+    concurrency: 'deploy'
+    needs:
+      - build
+    permissions:
+      id-token: write
+      contents: read
+      checks: write
+    with:
+      runs_on: github-hosted-azure # This is the name of the self-hosted runner label
+      environment: 'dev'
+      location: 'australiaeast'
+      subscriptionId: 'd62bb41f-f4ff-43d0-8576-40b114f1b709'
+      resourcegroup: 'rg-ae-ais-dev-eccpricing'
+      integration_name: 'ecc-pricing'
+      integration_name_folder: 'ecc-pricing'
+      dotnet_version: '8.0.x'
+      run_tests: true 
+      functionapp_artifact_name: functionapp
+      azure_functionapp_name_fmt: 'func-ae-ais-{0}-eccpricing'
+      slot: 'production'
+      infrastructure_artifact_name: infrastructure
+      update_infra: true  #${{ needs.changes.outputs.infrastructure == 'true'}}
+      update_func: true #${{ needs.changes.outputs.functionapp == 'true'}}
+      update_logic: false
+    secrets: inherit
+
+ 
