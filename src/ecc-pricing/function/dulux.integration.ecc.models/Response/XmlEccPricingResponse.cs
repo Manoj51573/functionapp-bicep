@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 
 namespace dulux.integration.ecc.models.response
 {
-    //[XmlRoot(ElementName = "IsOrderHeaderSet")]
+    [XmlRoot(ElementName = "IsOrderHeaderSet")]
     public class XmlEccPricingResponse
     {
         [XmlElement(ElementName = "IsOrderHeader")]
@@ -89,8 +89,7 @@ namespace dulux.integration.ecc.models.response
     public class ItOrderItems
     {
         [XmlElement(ElementName = "Discount")]
-        public decimal Discount { get; set; }
-
+        public string Discount { get; set; } // need to vbe decimal
         [XmlElement(ElementName = "TotalPriceIncGST")]
         public decimal TotalPriceIncGST { get; set; }
 
@@ -164,16 +163,17 @@ namespace dulux.integration.ecc.models.response
     public class XmlEsSalesOrderData
     {
         [XmlElement(ElementName = "GrossValHd")]
-        public decimal GrossValHd { get; set; }
+        public string GrossValHd { get; set; } //decimal
 
         [XmlElement(ElementName = "Refobjkey")]
         public string Refobjkey { get; set; }
 
         [XmlElement(ElementName = "TaxAmountHd")]
-        public decimal TaxAmountHd { get; set; }
+        public string TaxAmountHd { get; set; } //decimal
 
         [XmlElement(ElementName = "NetValHd")]
-        public decimal NetValHd { get; set; }
+        public string NetValHd { get; set; } //decimal
+
 
         [XmlElement(ElementName = "CreditExposureAmt")]
         public decimal CreditExposureAmt { get; set; }

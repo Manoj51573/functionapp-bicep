@@ -1,0 +1,56 @@
+<IsOrderHeaderSet>
+  <IsOrderHeader>
+    <PriceDate>2025-03-11</PriceDate>
+    <ReqDateH>2025-03-11</ReqDateH>
+    <DistrChan>DS</DistrChan>
+    <CurrIso>AUD</CurrIso>
+    <PurchNoC />
+    <SalesOrg>AU50</SalesOrg>
+    <SalesOff />
+    <RefObjKey>1234</RefObjKey>
+    <Division>50</Division>
+    <DocType>ZSOR</DocType>
+    <ItOrderSchedLinesSet>
+      <ItOrderSchedLines>
+        <SchedLine>0001</SchedLine>
+        <RefObjKey />
+        <ReqQty>1</ReqQty>
+        <ItmNumber>10</ItmNumber>
+        <ReqDate>2025-03-11</ReqDate>
+      </ItOrderSchedLines>
+    </ItOrderSchedLinesSet>
+    <ItOrderItemsSet>
+      <ItOrderItems>
+        <Plant></Plant>
+        <CondUnit />
+        <DocNumber />
+        <Material>7105107</Material>
+        <ItmNumber>10</ItmNumber>
+        <ReqQty />
+        <SalesUnit>EA</SalesUnit>
+        <NetPrice />
+        <NetValue />
+        <Currency />
+        <GST />
+        <TotalPriceIncGST />
+        <Discount />
+      </ItOrderItems>
+    </ItOrderItemsSet>
+    <ItOrderPartnersSet>
+      <ItOrderPartners>
+        <PartnRole>AG</PartnRole>
+        <PartnNumb>L304279</PartnNumb>
+        <PartnName />
+        <PartnCountry />
+        <RefObjKey>1234</RefObjKey>
+        <ItmNumber>000000</ItmNumber>
+      </ItOrderPartners>
+    </ItOrderPartnersSet>
+    <EsSalesOrderDataSet>
+      <EsSalesOrderData>
+        <Refobjkey>dummy</Refobjkey>
+        <CreditExposureAmt>10</CreditExposureAmt>
+      </EsSalesOrderData>
+    </EsSalesOrderDataSet>
+  </IsOrderHeader>
+</IsOrderHeaderSet>

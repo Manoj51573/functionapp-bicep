@@ -1,0 +1,36 @@
+{
+    "RefObjKey": "1234",
+    "ReqDateH": "0000-00-00",
+    "PriceDate": "0000-00-00",
+    "DistrChan": "",
+    "CurrIso": "",
+    "PurchNoC": "",
+    "SalesOrg": "",
+    "SalesOff": "",
+    "Division": "",
+    "DocType": "",
+    "ItOrderItemsSet": [
+        {
+            "DocNumber": "10",
+            "ItmNumber": "000010",
+            "ReqQty": "1.000",
+            "Material": "7105107",
+            "SalesUnit": "EA",
+            "NetPrice": "13.980000000",
+            "Plant": "NW20",
+            "NetValue": "13.980000000",
+            "Currency": "AUD",
+            "CondUnit": "EA",
+            "GST": "1.400000000",
+            "TotalPriceIncGST": "15.380000000",
+            "Discount": "0E-9"
+        }
+    ],
+    "EsSalesOrderDataSet": {
+        "Refobjkey": "1234",
+        "GrossValHd": "15.380000000",
+        "TaxAmountHd": "1.400000000",
+        "NetValHd": "13.980000000",
+        "CreditExposureAmt": "3444.5400"
+    }
+}

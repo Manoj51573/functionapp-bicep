@@ -23,4 +23,16 @@ param functionAppSettings = [
     name: 'KEY_VAULT_APIM_NAME'
     value: 'kv-ae-ais-dev-apim'
   }
+  {
+    name: 'SapEccOption:BaseUrl'
+    value: 'https://api-dev.dwer.wa.gov.au/integration/pricing/v1/get-price'
+  }
+  {
+    name: 'SapEccOption:UserName'
+    value: 'kv-ae-ais-dev-apim'
+  }
+  {
+    name: 'SapEccOption:Password'
+    value: 'dummy'
+  }
 ]

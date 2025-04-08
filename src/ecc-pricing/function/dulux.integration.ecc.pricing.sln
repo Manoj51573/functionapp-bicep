@@ -1,11 +1,13 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dulux.integration.ecc.pricing", "dulux.integration.ecc.pricing\dulux.integration.ecc.pricing.csproj", "{BF33437C-35DE-4B4E-9FCD-5D31443499AE}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dulux.integration.ecc.models", "dulux.integration.ecc.models\dulux.integration.ecc.models.csproj", "{229E7657-35DB-4550-AA38-4788D783567B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dulux.integration.ecc.services", "dulux.integration.ecc.services\dulux.integration.ecc.services.csproj", "{CE4625AA-CCE7-40D1-8381-D446B11F38CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dulux.integration.ecc.pricing", "dulux.integration.ecc.pricing\dulux.integration.ecc.pricing.csproj", "{58373065-6B75-4307-8336-3CEAD0C2D68F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +15,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{BF33437C-35DE-4B4E-9FCD-5D31443499AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BF33437C-35DE-4B4E-9FCD-5D31443499AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BF33437C-35DE-4B4E-9FCD-5D31443499AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BF33437C-35DE-4B4E-9FCD-5D31443499AE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{229E7657-35DB-4550-AA38-4788D783567B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{229E7657-35DB-4550-AA38-4788D783567B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{229E7657-35DB-4550-AA38-4788D783567B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{229E7657-35DB-4550-AA38-4788D783567B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE4625AA-CCE7-40D1-8381-D446B11F38CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE4625AA-CCE7-40D1-8381-D446B11F38CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE4625AA-CCE7-40D1-8381-D446B11F38CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE4625AA-CCE7-40D1-8381-D446B11F38CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58373065-6B75-4307-8336-3CEAD0C2D68F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58373065-6B75-4307-8336-3CEAD0C2D68F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58373065-6B75-4307-8336-3CEAD0C2D68F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58373065-6B75-4307-8336-3CEAD0C2D68F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
