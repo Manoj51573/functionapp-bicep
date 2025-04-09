@@ -31,15 +31,15 @@ on:
       build_func: 
         description: Update function app
         type: boolean
-        default: true
+        default: false
       build_logic: 
         description: Update logic app
         type: boolean
-        default: true
+        default: false
       update_tools:
         description: Update Linux Tools
         type: boolean
-        default: true
+        default: false
 
 jobs:        
   # install-tools:

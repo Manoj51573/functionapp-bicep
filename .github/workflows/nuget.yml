@@ -17,7 +17,7 @@ on:
         type: string
       solution_name:
         description: The name of the solution
-        required_true:
+        required: true
         type: string
       force_publish:
         description: Forces publishing the package even if not on the main branch

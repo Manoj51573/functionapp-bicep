@@ -98,6 +98,9 @@ jobs:
       update_infra: true  #${{ needs.changes.outputs.infrastructure == 'true'}}
       update_func: true #${{ needs.changes.outputs.functionapp == 'true'}}
       update_logic: false
+      keyvault_name_shared: 'kv-ae-ais-dev-nnpbak'
+      run_predeployScript: true
+      run_postdeployScript: true
     secrets: inherit
 
  

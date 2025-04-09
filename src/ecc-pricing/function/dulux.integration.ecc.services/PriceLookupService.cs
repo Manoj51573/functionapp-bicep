@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -34,7 +35,7 @@ namespace dulux.integration.ecc.services
                 Encoding.UTF8,
             "application/xml");
 
-
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{ _option.Value.UserName }:{_option.Value.Password}")));
             var result = await client.PostAsync($"{_option.Value.BaseUrl}", content);
             string responseString = string.Empty;
 

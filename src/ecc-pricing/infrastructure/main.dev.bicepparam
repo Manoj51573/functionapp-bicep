@@ -2,6 +2,11 @@ using 'main.bicep'
 
 param env = 'dev'
 param integrationSuffix = 'eccpricing'
+
+var keyVaultName = 'kv-ae-ais-dev-nnpbak'
+var secretNameUsernameSapecc = '${env}-username-sapecc'
+var secretNameUserpwdSapecc = '${env}-userpwd-sapecc'
+
 param functionAppSettings = [
   {
     name: 'APP_ENVIRONMENT_NAME'
@@ -29,10 +34,10 @@ param functionAppSettings = [
   }
   {
     name: 'SapEccOption:UserName'
-    value: 'kv-ae-ais-dev-apim'
+     value: '@Microsoft.KeyVault(SecretUri=https://${keyVaultName}.vault.azure.net/secrets/${secretNameUsernameSapecc})'
   }
   {
     name: 'SapEccOption:Password'
-    value: 'dummy'
+    value: '@Microsoft.KeyVault(SecretUri=https://${keyVaultName}.vault.azure.net/secrets/${secretNameUserpwdSapecc})'
   }
 ]
