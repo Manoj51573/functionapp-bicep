@@ -30,7 +30,7 @@ param functionAppSettings = [
   }
   {
     name: 'SapEccOption:BaseUrl'
-    value: 'https://api-dev.dwer.wa.gov.au/integration/pricing/v1/get-price'
+    value: 'https://apim-ae-dulux-001.azure-api.net/integration/pricing/v1/get-price'
   }
   {
     name: 'SapEccOption:UserName'

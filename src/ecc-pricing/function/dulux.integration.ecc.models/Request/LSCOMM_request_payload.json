@@ -1,1 +1,34 @@
-{"DocType":"ZSOR","DistrChan":"DS","Division":"50","SalesOrg":"AU50","CurrIso":"AUD","ReqDateH":"2025-03-11","PriceDate":"2025-03-11","RefObjKey":"1234","ItOrderItemsSet":[{"ItmNumber":10,"Material":"7105107","SalesUnit":"EA","Plant":""}],"ItOrderPartnersSet":[{"PartnRole":"AG","PartnNumb":"L304279","ItmNumber":"000000","RefObjKey":"1234"}],"ItOrderSchedLinesSet":[{"ItmNumber":10,"SchedLine":"0001","ReqQty":1,"ReqDate":"2025-03-11"}]}
+{
+  "DocType": "ZSOR",
+  "DistrChan": "DS",
+  "Division": "50",
+  "SalesOrg": "AU50",
+  "CurrIso": "AUD",
+  "ReqDateH": "2025-03-11",
+  "PriceDate": "2025-03-11",
+  "RefObjKey": "1234",
+  "ItOrderItemsSet": [
+    {
+      "ItmNumber": 10,
+      "Material": "7105107",
+      "SalesUnit": "EA",
+      "Plant": ""
+    }
+  ],
+  "ItOrderPartnersSet": [
+    {
+      "PartnRole": "AG",
+      "PartnNumb": "L304279",
+      "ItmNumber": "000000",
+      "RefObjKey": "1234"
+    }
+  ],
+  "ItOrderSchedLinesSet": [
+    {
+      "ItmNumber": 10,
+      "SchedLine": "0001",
+      "ReqQty": 1,
+      "ReqDate": "2025-03-11"
+    }
+  ]
+}

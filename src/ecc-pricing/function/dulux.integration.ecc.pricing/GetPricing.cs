@@ -18,7 +18,7 @@ namespace GetPricing
         private readonly ILogger<GetPricing> _logger;
         private readonly IPriceLookupService _priceLookupService;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
-
+        
         public GetPricing(ILogger<GetPricing> logger, IPriceLookupService priceLookupService)
         {
             _logger = logger;
@@ -26,6 +26,8 @@ namespace GetPricing
             _jsonSerializerOptions = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
+                IncludeFields = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             };
         }
 
@@ -78,7 +80,7 @@ namespace GetPricing
                     if (!RequestMessageValid(requestBody, out string[] errors))
                     {
                         // Return a HTTP 400 response
-                        return new BadRequestObjectResult(new ErrorResponse { Error = "Invalid Request" });
+                        return new BadRequestObjectResult(errors); //new ErrorResponse { Error = "Invalid Request" });
                     }
 
                     var lookupRequest = JsonConvert.DeserializeObject<GetPricingRequestPayload>(requestBody);

@@ -1,0 +1,36 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "contentVersion": "1.0.0.0",
+        "actions": {
+            "Execute_query": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "query": "SELECT * from [CTL].[TaskLog]"
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "sql",
+                        "operationId": "executeQuery",
+                        "serviceProviderId": "/serviceProviders/sql"
+                    },
+                    "retryPolicy": {
+                        "type": "none"
+                    }
+                }
+            }
+        },
+        "triggers": {
+            "Recurrence": {
+                "type": "Recurrence",
+                "recurrence": {
+                    "interval": 1,
+                    "frequency": "Hour",
+                    "timeZone": "AUS Eastern Standard Time"
+                }
+            }
+        },
+        "outputs": {}
+    },
+    "kind": "Stateful"
+}

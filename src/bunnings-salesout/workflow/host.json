@@ -5,11 +5,15 @@
       "samplingSettings": {
         "isEnabled": true,
         "excludedTypes": "Request"
-      },
-      "enableLiveMetricsFilters": true
+      }
     },
     "logLevel": {
-      "default": "Information"
+      "Host.Triggers.Workflows":"Warning"
     }
+
+  },
+  "extensionBundle": {
+    "id": "Microsoft.Azure.Functions.ExtensionBundle.Workflows",
+    "version": "[1.*, 2.0.0)"
   }
 }

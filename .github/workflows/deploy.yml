@@ -46,7 +46,7 @@ on:
       azure_functionapp_name_fmt:
         description: Function App name format, e.g. func-sample-integration-auea-{0} where {0} will be replaced by the environment name
         type: string
-        required: true
+        required: false
       slot:
         description: The name of the Azure Function slot to publish to
         type: string
@@ -73,14 +73,6 @@ on:
         default: true
       update_logic: 
         description: Update logic app
-        type: boolean
-        default: false
-      keyvault_name_shared:  
-        description: Name of the key vault to use for shared secrets
-        type: string
-        default: kv-ae-ais-dev-nnpbak 
-      run_predeployScript:
-        description: Needs to run predeploy script
         type: boolean
         default: false
       run_postdeployScript:
@@ -127,15 +119,6 @@ jobs:
           inlineScript: ././scripts/Create-ResourceGroupWithTags.ps1 -Location ${{ inputs.location }} -ResourceGroupName ${{ env.AZURE_RG }} -EnvironmentAbbreviation ${{ inputs.environment }}
           azPSVersion: "latest"    
       
-      # - name: Checkout
-      #   uses: actions/checkout@v4    
-      - name: Run Pre-deployment Sript
-        uses: azure/powershell@v2
-        if: ${{ inputs.run_predeployScript }}  
-        with:
-          inlineScript: src/${{ inputs.integration_name_folder }}/scripts/pre-deploy.ps1 -environmentName ${{ inputs.environment }} -keyVaultName ${{ inputs.keyvault_name_shared }} -usernameSapEcc ${{ secrets.USERNAME_SAPECC }} -userpwdSapEcc '${{ secrets.USERPWD_SAPECC }}'
-          azPSVersion: "latest"
-
       - name: Deploy Azure Infrastructure
         if: inputs.update_infra
         run: |

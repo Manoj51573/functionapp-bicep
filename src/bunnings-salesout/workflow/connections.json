@@ -1,0 +1,121 @@
+{
+  "serviceProviderConnections": {
+    "FileSystem": {
+        "displayName": "fileShareSapBw",
+        "parameterValues": {
+            "mountPath": "@appsetting('FileSystem_mountPath')"
+        },
+        "serviceProvider": {
+            "id": "/serviceProviders/FileSystem"
+        }
+    },
+    "azureTables": {
+      "displayName": "ReferenceStoreConnection",
+      "parameterValues": {
+        "connectionString": "@appsetting('AzureTableConnectionString')"
+      },
+      "serviceProvider": {
+        "id": "/serviceProviders/azureTables"
+      }
+    },
+    "sql": {
+      "displayName": "sql-connection-controldatabase",
+      "parameterSetName": "ManagedServiceIdentity",
+      "parameterValues": {
+        "authProvider": {
+          "Type": "ManagedServiceIdentity"
+        },
+        "databaseName": "@appsetting('SqlDatabaseName')",
+        "serverName": "@appsetting('SqlServerName')",
+        "managedIdentityType": "SystemAssigned"
+      },
+      "serviceProvider": {
+        "id": "/serviceProviders/sql"
+      }
+    },
+    "sftp": {
+      "displayName": "sftp-connection-si",
+      "parameterValues": {
+        "sshHostAddress": "@appsetting('SFTP_HOSTNAME_SI_SERVER')",
+        "userName": "@appsetting('SFTP_USERNAME_SI_SERVER')",
+        "password": "@appsetting('SFTP_USERPWD_SI_SERVER')",
+        "rootFolder": "@appsetting('SFTP_ROOTFOLDER_SI_SERVER')"
+      },
+      "serviceProvider": {
+        "id": "/serviceProviders/sftp"
+      }
+    },
+    "adls": {
+      "displayName": "adls-connection",
+      "parameterSetName": "ManagedServiceIdentity",
+      "parameterValues": {
+        "storageAccountName": "dgitnpeaseadls",
+       "blobStorageEndpoint": "https://@{appsetting('Dulux_ADLS_AccountName')}.blob.core.windows.net",
+        "authProvider": {
+          "type": "ManagedServiceIdentity"
+        },
+        "managedIdentityType": "SystemAssigned"
+      },
+      "serviceProvider": {
+        "id": "/serviceProviders/AzureBlob"
+      }
+    },
+    "AzureBlob": {
+            "displayName": "azureblob",
+            "parameterSetName": "ManagedServiceIdentity",
+            "parameterValues": {
+                "authProvider": {
+                    "Type": "ManagedServiceIdentity"
+                },
+                "blobStorageEndpoint": "https://@{appsetting('DataStorage_AccountName')}.blob.core.windows.net"
+            },
+            "serviceProvider": {
+                "id": "/serviceProviders/AzureBlob"
+            }
+        }
+  },
+  "managedApiConnections": {        
+    "office365": {
+        "api": {
+            "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/providers/Microsoft.Web/locations/@{appsetting('WORKFLOWS_LOCATION_NAME')}/managedApis/office365"
+        },
+        "authentication": {
+            "type": "ManagedServiceIdentity"
+        },
+        "connection": {
+            "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/resourceGroups/@{appsetting('WORKFLOWS_RESOURCE_GROUP_NAME')}/providers/Microsoft.Web/connections/office365"
+        },
+        "connectionRuntimeUrl": "@appsetting('Office365_Connection_RuntimeUrl')"
+    },
+    "sftpwithssh": {
+        "api": {
+            "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/providers/Microsoft.Web/locations/@{appsetting('WORKFLOWS_LOCATION_NAME')}/managedApis/sftpwithssh"
+        },
+        "authentication": {
+            "type": "ManagedServiceIdentity"
+        },
+        "connection": {
+            "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/resourceGroups/@{appsetting('WORKFLOWS_RESOURCE_GROUP_NAME')}/providers/Microsoft.Web/connections/sftpconnector"
+        },
+        "connectionRuntimeUrl": "@appsetting('Sftp_Connection_RuntimeUrl')"
+    },
+    "azuredatafactory": {
+        "api": {
+            "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/providers/Microsoft.Web/locations/@{appsetting('WORKFLOWS_LOCATION_NAME')}/managedApis/azuredatafactory"
+        },
+        "authentication": {
+            "type": "ManagedServiceIdentity"
+        },
+        "connection": {
+            "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/resourceGroups/@{appsetting('WORKFLOWS_RESOURCE_GROUP_NAME')}/providers/Microsoft.Web/connections/azuredatafactory-1"
+        },
+        "connectionProperties": {
+          "authentication": {
+              "audience": "https://management.core.windows.net/",
+              "type": "ManagedServiceIdentity"
+          }
+        },
+        "connectionRuntimeUrl": "https://6b5e102ba8fd42d7.07.common.logic-australiaeast.azure-apihub.net/apim/azuredatafactory/f0d40a86eaa14d51ad6444ab4310fbd2"
+    }
+  }
+}

@@ -1,0 +1,250 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Create_a_pipeline_run_-_ADLS_csv_to_ADLS_parquet": {
+                "type": "ApiConnection",
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "referenceName": "azuredatafactory"
+                        }
+                    },
+                    "method": "post",
+                    "path": "/subscriptions/@{encodeURIComponent('9921d38c-3739-4271-95f2-c09093ad87a4')}/resourcegroups/@{encodeURIComponent('EA-NonProd-DataInsights-RG')}/providers/Microsoft.DataFactory/factories/@{encodeURIComponent('dgit-npe-ase-ADF')}/pipelines/@{encodeURIComponent('ADLS csv_to_ADLS parquet')}/CreateRun",
+                    "queries": {
+                        "x-ms-api-version": "2017-09-01-preview"
+                    }
+                },
+                "runAfter": {
+                    "Initialize_variable_IsComplete": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Initialize_variable_IsComplete": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "NumberOfCompletedFiles",
+                            "type": "integer",
+                            "value": 0
+                        }
+                    ]
+                },
+                "runAfter": {
+                    "Initialize_variable_RetryCount": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Check_if_all_the_processing_is_done": {
+                "type": "If",
+                "expression": {
+                    "and": [
+                        {
+                            "equals": [
+                                "@variables('NumberOfCompletedFiles')",
+                                "@int(parameters('ADLS_NumberOfFilesToProcess'))"
+                            ]
+                        }
+                    ]
+                },
+                "actions": {
+                    "Create_a_pipeline_run_-_PBI_Refresh_v1": {
+                        "type": "ApiConnection",
+                        "inputs": {
+                            "host": {
+                                "connection": {
+                                    "referenceName": "azuredatafactory"
+                                }
+                            },
+                            "method": "post",
+                            "path": "/subscriptions/@{encodeURIComponent('9921d38c-3739-4271-95f2-c09093ad87a4')}/resourcegroups/@{encodeURIComponent('EA-NonProd-DataInsights-RG')}/providers/Microsoft.DataFactory/factories/@{encodeURIComponent('dgit-npe-ase-ADF')}/pipelines/@{encodeURIComponent('PBI_Refresh_v1')}/CreateRun",
+                            "queries": {
+                                "x-ms-api-version": "2017-09-01-preview"
+                            }
+                        }
+                    }
+                },
+                "else": {
+                    "actions": {}
+                },
+                "runAfter": {
+                    "Until_maximum_retry_is_attempted": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Response": {
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                    "statusCode": 200
+                },
+                "runAfter": {
+                    "Check_if_all_the_processing_is_done": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Until_maximum_retry_is_attempted": {
+                "type": "Until",
+                "expression": "@equals(variables('RetryCount'),5)",
+                "limit": {
+                    "count": 60,
+                    "timeout": "PT1H"
+                },
+                "actions": {
+                    "check_for_completed_job": {
+                        "type": "If",
+                        "expression": {
+                            "and": [
+                                {
+                                    "equals": [
+                                        "@length(body('Execute_query'))",
+                                        10
+                                    ]
+                                }
+                            ]
+                        },
+                        "actions": {
+                            "For_each_file_status": {
+                                "type": "Foreach",
+                                "foreach": "@body('Execute_query')",
+                                "actions": {
+                                    "check_if_the_status_is_complete": {
+                                        "type": "If",
+                                        "expression": {
+                                            "and": [
+                                                {
+                                                    "equals": [
+                                                        "@item()",
+                                                        "Succeeded"
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "actions": {
+                                            "Increment_variable_NumberOfCompletedFiles": {
+                                                "type": "IncrementVariable",
+                                                "inputs": {
+                                                    "name": "NumberOfCompletedFiles",
+                                                    "value": 1
+                                                }
+                                            }
+                                        },
+                                        "else": {
+                                            "actions": {}
+                                        }
+                                    },
+                                    "Delay_1_minute": {
+                                        "type": "Wait",
+                                        "inputs": {
+                                            "interval": {
+                                                "count": 1,
+                                                "unit": "Minute"
+                                            }
+                                        },
+                                        "runAfter": {
+                                            "check_if_the_status_is_complete": [
+                                                "SUCCEEDED"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "runtimeConfiguration": {
+                                    "concurrency": {
+                                        "repetitions": 1
+                                    }
+                                }
+                            }
+                        },
+                        "else": {
+                            "actions": {}
+                        },
+                        "runAfter": {
+                            "Execute_query": [
+                                "SUCCEEDED"
+                            ]
+                        }
+                    },
+                    "Increment_variable_RetryCount": {
+                        "type": "IncrementVariable",
+                        "inputs": {
+                            "name": "RetryCount",
+                            "value": 1
+                        },
+                        "runAfter": {
+                            "check_for_completed_job": [
+                                "SUCCEEDED"
+                            ]
+                        }
+                    },
+                    "Execute_query": {
+                        "type": "ServiceProvider",
+                        "inputs": {
+                            "parameters": {
+                                "query": "SELECT tl.Status, tl.FullBlobName\n  FROM [CTL].[TaskLog] tl\n  inner join ctl.task t on t.taskid = tl.taskid\n  inner join ctl.process p on p.processid = t.processid\n  inner join ctl.project pr on pr.projectid = p.projectid\n  where  FullBlobName LIKE '%Curated_F_Bunnings_SalesOut%'\n and tl.Status = 'Succeeded' and p.projectid=28\n  order by batchid desc"
+                            },
+                            "serviceProviderConfiguration": {
+                                "connectionName": "sql",
+                                "operationId": "executeQuery",
+                                "serviceProviderId": "/serviceProviders/sql"
+                            },
+                            "retryPolicy": {
+                                "type": "none"
+                            }
+                        }
+                    },
+                    "Delay_for_the_next_fetch": {
+                        "type": "Wait",
+                        "inputs": {
+                            "interval": {
+                                "count": 2,
+                                "unit": "Minute"
+                            }
+                        },
+                        "runAfter": {
+                            "Increment_variable_RetryCount": [
+                                "SUCCEEDED"
+                            ]
+                        }
+                    }
+                },
+                "runAfter": {
+                    "Create_a_pipeline_run_-_ADLS_csv_to_ADLS_parquet": [
+                        "SUCCEEDED",
+                        "FAILED"
+                    ]
+                }
+            },
+            "Initialize_variable_RetryCount": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "RetryCount",
+                            "type": "integer",
+                            "value": 5
+                        }
+                    ]
+                },
+                "runAfter": {}
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "When_a_HTTP_request_is_received": {
+                "type": "Request",
+                "kind": "Http",
+                "inputs": {
+                    "method": "POST"
+                }
+            }
+        }
+    },
+    "kind": "Stateful"
+}

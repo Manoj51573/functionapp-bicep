@@ -1,4 +1,4 @@
-name: Release - Get Pricing API
+name: Release - Bunnings Sales Out Integration
 
 on: 
   push:
@@ -6,12 +6,12 @@ on:
       - main
       - feature/*
       paths:
-      - 'src/ecc-pricing/**'
+      - 'src/bunnings-salesout/**'
   workflow_dispatch: 
 
 env: 
-  integration_name: ecc-pricing
-  integration_name_folder: ecc-pricing
+  integration_name: bunnings-salesout
+  integration_name_folder: bunnings-salesout
 
 jobs:
   changes:
@@ -64,8 +64,8 @@ jobs:
       integration_name_folder: ${{ needs.changes.outputs.integration_name_folder }}
       run_tests: false
       build_infra: true  
-      build_func: true
-      build_logic: false
+      build_func: false
+      build_logic: true
       update_tools:  ${{ needs.changes.outputs.github == 'true' }}
     secrets: inherit
 
@@ -86,19 +86,18 @@ jobs:
       environment: 'dev'
       location: 'australiaeast'
       subscriptionId: 'd62bb41f-f4ff-43d0-8576-40b114f1b709'
-      resourcegroup: 'rg-ae-ais-dev-eccpricing'
-      integration_name: 'ecc-pricing'
-      integration_name_folder: 'ecc-pricing'
+      resourcegroup: 'rg-ae-ais-dev-bunnings-salesout'
+      integration_name: 'bunnings-salesout'
+      integration_name_folder: 'bunnings-salesout'
       dotnet_version: '8.0.x'
       run_tests: true 
-      functionapp_artifact_name: functionapp
-      azure_functionapp_name_fmt: 'func-ae-ais-{0}-eccpricing'
+      logicapp_artifact_name: logicapp
+      azure_logicapp_name_fmt: 'logic-ae-ais-{0}-bunsales'
       slot: 'production'
       infrastructure_artifact_name: infrastructure
       update_infra: true  #${{ needs.changes.outputs.infrastructure == 'true'}}
-      update_func: true #${{ needs.changes.outputs.functionapp == 'true'}}
-      update_logic: false
-      run_postdeployScript: true
+      update_func: false #${{ needs.changes.outputs.functionapp == 'true'}}
+      update_logic: true
     secrets: inherit
 
  

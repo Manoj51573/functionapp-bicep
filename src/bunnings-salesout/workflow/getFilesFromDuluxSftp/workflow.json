@@ -1,0 +1,430 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "contentVersion": "1.0.0.0",
+        "actions": {
+            "List_folder_-_inbound": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "folderPath": "Inbound"
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "sftp",
+                        "operationId": "listFolder",
+                        "serviceProviderId": "/serviceProviders/Sftp"
+                    }
+                },
+                "runAfter": {
+                    "Initialize_variables_TargetFileName": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "check_for_files": {
+                "type": "If",
+                "expression": {
+                    "and": [
+                        {
+                            "greater": [
+                                "@length(body('List_folder_-_inbound'))",
+                                0
+                            ]
+                        }
+                    ]
+                },
+                "actions": {
+                    "For_each_file": {
+                        "type": "foreach",
+                        "foreach": "@body('List_folder_-_inbound')",
+                        "actions": {
+                            "check_for_zip_file": {
+                                "type": "If",
+                                "expression": {
+                                    "and": [
+                                        {
+                                            "endsWith": [
+                                                "@items('For_each_file')?['name']",
+                                                ".zip"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "actions": {
+                                    "Extract_the_zip": {
+                                        "type": "ServiceProvider",
+                                        "inputs": {
+                                            "parameters": {
+                                                "sourceContainerName": "bunnings",
+                                                "sourceBlobName": "processing/@{items('For_each_file')?['name']}",
+                                                "destinationContainerName": "bunnings",
+                                                "destinationFolderPath": "processing",
+                                                "overwriteExistingFilesBehaviour": "Overwrite"
+                                            },
+                                            "serviceProviderConfiguration": {
+                                                "connectionName": "AzureBlob",
+                                                "operationId": "extractArchiveFromBlobPath",
+                                                "serviceProviderId": "/serviceProviders/AzureBlob"
+                                            },
+                                            "retryPolicy": {
+                                                "type": "none"
+                                            }
+                                        },
+                                        "runAfter": {
+                                            "Upload_zip_to_storage_container": [
+                                                "SUCCEEDED"
+                                            ]
+                                        }
+                                    },
+                                    "Delete_the_zip": {
+                                        "type": "ServiceProvider",
+                                        "inputs": {
+                                            "parameters": {
+                                                "containerName": "bunnings",
+                                                "blobName": "processing/@{items('For_each_file')?['name']}"
+                                            },
+                                            "serviceProviderConfiguration": {
+                                                "connectionName": "AzureBlob",
+                                                "operationId": "deleteBlob",
+                                                "serviceProviderId": "/serviceProviders/AzureBlob"
+                                            },
+                                            "retryPolicy": {
+                                                "type": "none"
+                                            }
+                                        },
+                                        "runAfter": {
+                                            "Upload_blob_to_storage_container": [
+                                                "SUCCEEDED"
+                                            ]
+                                        }
+                                    },
+                                    "Delete the extracted file": {
+                                        "type": "ServiceProvider",
+                                        "inputs": {
+                                            "parameters": {
+                                                "containerName": "bunnings",
+                                                "blobName": "processing/@{outputs('Extract_the_zip')?['body']['extractedBlobs']?[0]['name']}"
+                                            },
+                                            "serviceProviderConfiguration": {
+                                                "connectionName": "AzureBlob",
+                                                "operationId": "deleteBlob",
+                                                "serviceProviderId": "/serviceProviders/AzureBlob"
+                                            },
+                                            "retryPolicy": {
+                                                "type": "none"
+                                            }
+                                        },
+                                        "runAfter": {
+                                            "Delete_the_zip": [
+                                                "Succeeded"
+                                            ]
+                                        }
+                                    },
+                                    "Upload_zip_to_storage_container": {
+                                        "type": "ServiceProvider",
+                                        "inputs": {
+                                            "parameters": {
+                                                "containerName": "bunnings",
+                                                "blobName": "processing/@{items('For_each_file')?['name']}",
+                                                "content": "@body('Get_file_content')?['content']",
+                                                "overrideIfExists": "true"
+                                            },
+                                            "serviceProviderConfiguration": {
+                                                "connectionName": "AzureBlob",
+                                                "operationId": "uploadBlob",
+                                                "serviceProviderId": "/serviceProviders/AzureBlob"
+                                            },
+                                            "retryPolicy": {
+                                                "type": "none"
+                                            }
+                                        }
+                                    },
+                                    "Upload_blob_to_storage_container": {
+                                        "type": "ServiceProvider",
+                                        "inputs": {
+                                            "parameters": {
+                                                "containerName": "bunnings",
+                                                "blobName": "processing/@{variables('TargetFileName')}",
+                                                "content": "@body('Read_extracted_content')?['content']",
+                                                "overrideIfExists": "true"
+                                            },
+                                            "serviceProviderConfiguration": {
+                                                "connectionName": "AzureBlob",
+                                                "operationId": "uploadBlob",
+                                                "serviceProviderId": "/serviceProviders/AzureBlob"
+                                            }
+                                        },
+                                        "runAfter": {
+                                            "Read_extracted_content": [
+                                                "Succeeded"
+                                            ]
+                                        }
+                                    },
+                                    "Read_extracted_content": {
+                                        "type": "ServiceProvider",
+                                        "inputs": {
+                                            "parameters": {
+                                                "containerName": "bunnings",
+                                                "blobName": "processing/@{outputs('Extract_the_zip')?['body']['extractedBlobs']?[0]['name']}"
+                                            },
+                                            "serviceProviderConfiguration": {
+                                                "connectionName": "AzureBlob",
+                                                "operationId": "readBlob",
+                                                "serviceProviderId": "/serviceProviders/AzureBlob"
+                                            }
+                                        },
+                                        "runAfter": {
+                                            "Extract_the_zip": [
+                                                "Succeeded"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "else": {
+                                    "actions": {
+                                        "Upload_file_to_storage_container": {
+                                            "type": "ServiceProvider",
+                                            "inputs": {
+                                                "parameters": {
+                                                    "containerName": "bunnings",
+                                                    "blobName": "processing/@{variables('TargetFileName')}",
+                                                    "content": "@body('Get_file_content')?['content']",
+                                                    "overrideIfExists": "true"
+                                                },
+                                                "serviceProviderConfiguration": {
+                                                    "connectionName": "AzureBlob",
+                                                    "operationId": "uploadBlob",
+                                                    "serviceProviderId": "/serviceProviders/AzureBlob"
+                                                },
+                                                "retryPolicy": {
+                                                    "type": "none"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "runAfter": {
+                                    "Get_file_content": [
+                                        "SUCCEEDED"
+                                    ]
+                                }
+                            },
+                            "Upload to archive": {
+                                "type": "ServiceProvider",
+                                "inputs": {
+                                    "parameters": {
+                                        "filePath": "/Archive/@{items('For_each_file')?['name']}",
+                                        "overWriteFileIfExists": true,
+                                        "content": "@body('Get_file_content')?['content']"
+                                    },
+                                    "serviceProviderConfiguration": {
+                                        "connectionName": "sftp",
+                                        "operationId": "uploadFileContent",
+                                        "serviceProviderId": "/serviceProviders/Sftp"
+                                    },
+                                    "retryPolicy": {
+                                        "type": "none"
+                                    }
+                                },
+                                "runAfter": {
+                                    "check_for_zip_file": [
+                                        "Succeeded"
+                                    ]
+                                }
+                            },
+                            "Filter_mapped_array": {
+                                "type": "Query",
+                                "inputs": {
+                                    "from": "@body('Call_workflow_-_mapToTargetFiles')",
+                                    "where": "@equals(item()?['sourceName'],items('For_each_file')?['name'])"
+                                }
+                            },
+                            "check_if_the_mapping_was_successful": {
+                                "type": "If",
+                                "expression": {
+                                    "and": [
+                                        {
+                                            "greater": [
+                                                "@length(body('Filter_mapped_array'))",
+                                                0
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "actions": {
+                                    "Set_variable_TargetFileName_to_mapped_name": {
+                                        "type": "SetVariable",
+                                        "inputs": {
+                                            "name": "TargetFileName",
+                                            "value": "@outputs('Filter_mapped_array')['body'][0]['targetName']"
+                                        }
+                                    }
+                                },
+                                "else": {
+                                    "actions": {
+                                        "Set_variable_TargetFileName_to_original_name": {
+                                            "type": "SetVariable",
+                                            "inputs": {
+                                                "name": "TargetFileName",
+                                                "value": "@items('For_each_file')?['name']"
+                                            }
+                                        }
+                                    }
+                                },
+                                "runAfter": {
+                                    "Filter_mapped_array": [
+                                        "SUCCEEDED"
+                                    ]
+                                }
+                            },
+                            "Get_file_content": {
+                                "type": "ServiceProvider",
+                                "inputs": {
+                                    "parameters": {
+                                        "filePath": "@items('For_each_file')?['absolutePath']",
+                                        "inferContentType": true
+                                    },
+                                    "serviceProviderConfiguration": {
+                                        "connectionName": "sftp",
+                                        "operationId": "getFileContent",
+                                        "serviceProviderId": "/serviceProviders/Sftp"
+                                    }
+                                },
+                                "runAfter": {
+                                    "check_if_the_mapping_was_successful": [
+                                        "SUCCEEDED"
+                                    ]
+                                }
+                            }
+                        },
+                        "runAfter": {
+                            "Call_workflow_-_mapToTargetFiles": [
+                                "SUCCEEDED"
+                            ]
+                        },
+                        "runtimeConfiguration": {
+                            "concurrency": {
+                                "repetitions": 1
+                            }
+                        }
+                    },
+                    "List_all_the_blobs_using_path": {
+                        "type": "ServiceProvider",
+                        "inputs": {
+                            "parameters": {
+                                "containerName": "bunnings"
+                            },
+                            "serviceProviderConfiguration": {
+                                "connectionName": "AzureBlob",
+                                "operationId": "listBlobs",
+                                "serviceProviderId": "/serviceProviders/AzureBlob"
+                            }
+                        },
+                        "runAfter": {
+                            "For_each_file": [
+                                "SUCCEEDED",
+                                "FAILED"
+                            ]
+                        }
+                    },
+                    "Call_workflow_-_pushFilesToDataLake": {
+                        "type": "Workflow",
+                        "inputs": {
+                            "host": {
+                                "workflow": {
+                                    "id": "pushFilesToDataLake"
+                                }
+                            },
+                            "body": "@body('List_all_the_blobs_using_path')?['blobs']",
+                            "retryPolicy": {
+                                "type": "none"
+                            }
+                        },
+                        "runAfter": {
+                            "List_all_the_blobs_using_path": [
+                                "SUCCEEDED"
+                            ]
+                        }
+                    },
+                    "Call_workflow_-_rundataPipeline": {
+                        "type": "Workflow",
+                        "inputs": {
+                            "host": {
+                                "workflow": {
+                                    "id": "rundataPipeline"
+                                }
+                            },
+                            "retryPolicy": {
+                                "type": "none"
+                            }
+                        },
+                        "runAfter": {
+                            "Call_workflow_-_pushFilesToDataLake": [
+                                "SUCCEEDED"
+                            ]
+                        }
+                    },
+                    "Call_workflow_-_mapToTargetFiles": {
+                        "type": "Workflow",
+                        "inputs": {
+                            "host": {
+                                "workflow": {
+                                    "id": "mapToTargetFiles"
+                                }
+                            },
+                            "body": "@body('List_folder_-_inbound')"
+                        }
+                    },
+                    "Call_workflow_-_stageFilesToSapBw": {
+                        "type": "Workflow",
+                        "inputs": {
+                            "host": {
+                                "workflow": {
+                                    "id": "stageFilesToSapBw"
+                                }
+                            },
+                            "body": "@body('List_all_the_blobs_using_path')?['blobs']"
+                        },
+                        "runAfter": {
+                            "List_all_the_blobs_using_path": [
+                                "SUCCEEDED"
+                            ]
+                        }
+                    }
+                },
+                "else": {
+                    "actions": {}
+                },
+                "runAfter": {
+                    "List_folder_-_inbound": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Initialize_variables_TargetFileName": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "TargetFileName",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "runAfter": {}
+            }
+        },
+        "triggers": {
+            "Recurrence": {
+                "type": "Recurrence",
+                "recurrence": {
+                    "interval": 1,
+                    "frequency": "Hour",
+                    "timeZone": "AUS Eastern Standard Time"
+                }
+            }
+        },
+        "outputs": {}
+    },
+    "kind": "Stateful"
+}

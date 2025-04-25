@@ -1,0 +1,6 @@
+{
+    "ADLS_NumberOfFilesToProcess": {
+        "type": "String",
+        "value": "@appsetting('ADLS_NumberOfFilesToProcess')"
+    }
+}

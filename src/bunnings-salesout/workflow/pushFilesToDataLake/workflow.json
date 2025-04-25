@@ -1,0 +1,165 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "contentVersion": "1.0.0.0",
+        "actions": {
+            "For_each_files": {
+                "type": "foreach",
+                "foreach": "@triggerOutputs()?['body']",
+                "actions": {
+                    "Filter_array": {
+                        "type": "Query",
+                        "inputs": {
+                            "from": "@variables('FilesToStage')",
+                            "where": "@equals(concat('processing/',item()),items('For_each_files')?['name'])"
+                        }
+                    },
+                    "check_for_match": {
+                        "type": "If",
+                        "expression": {
+                            "and": [
+                                {
+                                    "not": {
+                                        "equals": [
+                                            "@length(body('Filter_array'))",
+                                            0
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        "actions": {
+                            "Read_blob_content": {
+                                "type": "ServiceProvider",
+                                "inputs": {
+                                    "parameters": {
+                                        "containerName": "bunnings",
+                                        "blobName": "@item()?['name']"
+                                    },
+                                    "serviceProviderConfiguration": {
+                                        "connectionName": "AzureBlob",
+                                        "operationId": "readBlob",
+                                        "serviceProviderId": "/serviceProviders/AzureBlob"
+                                    }
+                                }
+                            },
+                            "Upload_blob_to_storage_container": {
+                                "type": "ServiceProvider",
+                                "inputs": {
+                                    "parameters": {
+                                        "containerName": "drop/Bunnings_SalesOut",
+                                        "blobName": "@substring(item()?['name'],11,sub(length(item()?['name']),11))",
+                                        "content": "@body('Read_blob_content')?['content']"
+                                    },
+                                    "serviceProviderConfiguration": {
+                                        "connectionName": "adls",
+                                        "operationId": "uploadBlob",
+                                        "serviceProviderId": "/serviceProviders/AzureBlob"
+                                    },
+                                    "retryPolicy": {
+                                        "type": "none"
+                                    }
+                                },
+                                "runAfter": {
+                                    "Read_blob_content": [
+                                        "SUCCEEDED"
+                                    ]
+                                }
+                            }
+                        },
+                        "else": {
+                            "actions": {}
+                        },
+                        "runAfter": {
+                            "Filter_array": [
+                                "SUCCEEDED"
+                            ]
+                        }
+                    }
+                },
+                "runAfter": {
+                    "Initialize_variables": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Response": {
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                    "statusCode": 200
+                },
+                "runAfter": {
+                    "For_each_files": [
+                        "SUCCEEDED",
+                        "FAILED"
+                    ]
+                }
+            },
+            "Initialize_variables": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "FilesToStage",
+                            "type": "array",
+                            "value": [
+                                "YTSNZ5254000.csv",
+                                "SELNZ4315000.csv",
+                                "DULNZ2062318.csv",
+                                "DULNZ2062300.csv",
+                                "DULNZ2062200.csv",
+                                "DULNZ1528200.csv",
+                                "SEA111.csv",
+                                "SEA112.csv",
+                                "DUL001.csv",
+                                "DUL003.csv",
+                                "DUL005.csv",
+                                "SEL029.csv",
+                                "CAB055.csv",
+                                "YAT009.csv",
+                                "CAB059.csv",
+                                "POR151.csv",
+                                "PAR217.csv"
+                            ]
+                        }
+                    ]
+                },
+                "runAfter": {}
+            }
+        },
+        "triggers": {
+            "When_a_HTTP_request_is_received": {
+                "type": "Request",
+                "kind": "Http",
+                "inputs": {
+                    "method": "POST",
+                    "schema": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "containerName": {
+                                    "type": "string"
+                                },
+                                "blobFullPathWithContainer": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "name",
+                                "containerName",
+                                "blobFullPathWithContainer"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "outputs": {}
+    },
+    "kind": "Stateful"
+}

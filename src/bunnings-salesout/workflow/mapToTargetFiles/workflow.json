@@ -1,0 +1,459 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Initialize_variables_FileNameArray": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "FileNameArray",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "runAfter": {}
+            },
+            "For_each_source_file": {
+                "type": "Foreach",
+                "foreach": "@triggerBody()",
+                "actions": {
+                    "Set_variable_FileNamePrefix": {
+                        "type": "SetVariable",
+                        "inputs": {
+                            "name": "FileNamePrefix",
+                            "value": "@substring(item()?['name'],0,27)"
+                        }
+                    },
+                    "Switch_on_fileNamePrefix": {
+                        "type": "Switch",
+                        "expression": "@variables('FileNamePrefix')",
+                        "default": {
+                            "actions": {}
+                        },
+                        "cases": {
+                            "Case-YTSNZ5254000": {
+                                "actions": {
+                                    "Append_to_FileNameArray-YTSNZ5254000": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "YTSNZ5254000.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_525400"
+                            },
+                            "Case-SELNZ4315000": {
+                                "actions": {
+                                    "Append_to_FileNameArray-SELNZ4315000": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "SELNZ4315000.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_431500"
+                            },
+                            "Case-DULNZ2062318": {
+                                "actions": {
+                                    "Append_to_FileNameArray-DULNZ2062318": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "DULNZ2062318.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_206231"
+                            },
+                            "Case-DULNZ2062300": {
+                                "actions": {
+                                    "Append_to_FileNameArray-DULNZ2062300": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "DULNZ2062300.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_206230"
+                            },
+                            "Case-DULNZ2062200": {
+                                "actions": {
+                                    "Append_to_FileNameArray-DULNZ2062200": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "DULNZ2062200.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_206220"
+                            },
+                            "Case-DULNZ1528200": {
+                                "actions": {
+                                    "Append_to_FileNameArray-DULNZ1528200": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "DULNZ1528200.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_152820"
+                            },
+                            "Case-SEA111": {
+                                "actions": {
+                                    "Append_to_FileNameArray-SEA111": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "SEA111.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_SEA111"
+                            },
+                            "Case-SEA112": {
+                                "actions": {
+                                    "Append_to_FileNameArray-SEA112": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "SEA112.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_SEA112"
+                            },
+                            "Case-DUL001": {
+                                "actions": {
+                                    "Append_to_FileNameArray-DUL001": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "DUL001.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_DUL001"
+                            },
+                            "Case-DUL003": {
+                                "actions": {
+                                    "Append_to_FileNameArray-DUL003": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "DUL003.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_DUL003"
+                            },
+                            "Case-DUL005": {
+                                "actions": {
+                                    "Append_to_FileNameArray-DUL005": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "DUL005.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_DUL005"
+                            },
+                            "Case-SEL029": {
+                                "actions": {
+                                    "Append_to_FileNameArray-SEL029": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "SEL029.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_SEL029"
+                            },
+                            "Case-SEL030": {
+                                "actions": {
+                                    "Append_to_FileNameArray-SEL030": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "SEL030.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_SEL030"
+                            },
+                            "Case-CAB055": {
+                                "actions": {
+                                    "Append_to_FileNameArray-CAB055": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "CAB055.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_CAB055"
+                            },
+                            "Case-YAT009": {
+                                "actions": {
+                                    "Append_to_FileNameArray-YAT009": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "YAT009.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_YAT009"
+                            },
+                            "Case-CAB059": {
+                                "actions": {
+                                    "Append_to_FileNameArray-CAB059": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "CAB059.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_CAB059"
+                            },
+                            "Case-CAB005": {
+                                "actions": {
+                                    "Append_to_FileNameArray-CAB005": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "CAB005.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_CAB005"
+                            },
+                            "Case-POR151": {
+                                "actions": {
+                                    "Append_to_FileNameArray-POR151": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "POR151.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_POR151"
+                            },
+                            "Case-PAR217": {
+                                "actions": {
+                                    "Append_to_FileNameArray-PAR217": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "PAR217.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_PAR217"
+                            },
+                            "Case-SEL073": {
+                                "actions": {
+                                    "Append_to_FileNameArray-SEL073": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "SEL073.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_SEL073"
+                            },
+                            "Case-SEL074": {
+                                "actions": {
+                                    "Append_to_FileNameArray-SEL074": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "SEL074.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_SEL074"
+                            },
+                            "Case-SELNZ5305253": {
+                                "actions": {
+                                    "Append_to_FileNameArray-SELNZ5305253": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "SELNZ5305253.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_530525"
+                            },
+                            "Case-SEL5305315": {
+                                "actions": {
+                                    "Append_to_FileNameArray-SEL5305315": {
+                                        "type": "AppendToArrayVariable",
+                                        "inputs": {
+                                            "name": "FileNameArray",
+                                            "value": {
+                                                "sourceName": "@items('For_each_source_file')?['name']",
+                                                "targetName": "SEL5305315.csv"
+                                            }
+                                        }
+                                    }
+                                },
+                                "case": "invrpt_9377779137260_530531"
+                            }
+                        },
+                        "runAfter": {
+                            "Set_variable_FileNamePrefix": [
+                                "SUCCEEDED"
+                            ]
+                        }
+                    }
+                },
+                "runAfter": {
+                    "Initialize_variables_FileNamePrefix": [
+                        "SUCCEEDED"
+                    ]
+                },
+                "runtimeConfiguration": {
+                    "concurrency": {
+                        "repetitions": 1
+                    }
+                }
+            },
+            "Initialize_variables_FileNamePrefix": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "FileNamePrefix",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "runAfter": {
+                    "Initialize_variables_FileNameArray": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Response": {
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                    "statusCode": 200,
+                    "body": "@variables('FileNameArray')"
+                },
+                "runAfter": {
+                    "For_each_source_file": [
+                        "SUCCEEDED"
+                    ]
+                }
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "When_a_HTTP_request_is_received": {
+                "type": "Request",
+                "kind": "Http",
+                "inputs": {
+                    "method": "POST",
+                    "schema": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "absolutePath": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "name"
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "kind": "Stateful"
+}
