@@ -1,0 +1,92 @@
+{
+  "d": {
+    "__metadata": {
+      "id": "https://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/IsOrderHeaderSet('1234')",
+      "uri": "https://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/IsOrderHeaderSet('1234')",
+      "type": "ZCOD_SO_SIMULATE_SRV_01.IsOrderHeader"
+    },
+    "RefObjKey": "1234",
+    "DocType": "",
+    "SalesOrg": "",
+    "DistrChan": "",
+    "Division": "",
+    "SalesOff": "",
+    "ReqDateH": "0000-00-00",
+    "PriceDate": "0000-00-00",
+    "PurchNoC": "",
+    "CurrIso": "",
+    "ItOrderItemsSet": {
+      "results": [
+        {
+          "__metadata": {
+            "id": "https://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/ItOrderItemsSet(DocNumber='10',ItmNumber='000010')",
+            "uri": "https://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/ItOrderItemsSet(DocNumber='10',ItmNumber='000010')",
+            "type": "ZCOD_SO_SIMULATE_SRV_01.ItOrderItems"
+          },
+          "DocNumber": "10",
+          "ItmNumber": "000010",
+          "ReqQty": "1.000",
+          "Material": "7104977",
+          "SalesUnit": "EA",
+          "NetPrice": "85.330000000",
+          "Plant": "QW20",
+          "NetValue": "85.330000000",
+          "Currency": "AUD",
+          "CondUnit": "EA",
+          "GST": "8.530000000",
+          "TotalPriceIncGST": "93.860000000",
+          "Discount": "0.000000000",
+          "IsOrderHeader": {
+            "__deferred": {
+              "uri": "https://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/ItOrderItemsSet(DocNumber='10',ItmNumber='000010')/IsOrderHeader"
+            }
+          }
+        }
+      ]
+    },
+    "ItOrderPartnersSet": {
+      "results": []
+    },
+    "ItOrderSchedLinesSet": {
+      "results": []
+    },
+    "EsSalesOrderDataSet": {
+      "results": [
+        {
+          "__metadata": {
+            "id": "https://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/EsSalesOrderDataSet('dummy')",
+            "uri": "https://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/EsSalesOrderDataSet('dummy')",
+            "type": "ZCOD_SO_SIMULATE_SRV_01.EsSalesOrderData"
+          },
+          "Refobjkey": "dummy",
+          "NetValHd": "0.000000000",
+          "GrossValHd": "0.000000000",
+          "TaxAmountHd": "0.000000000",
+          "CreditExposureAmt": "10.0000",
+          "IsOrderHeader": {
+            "__deferred": {
+              "uri": "https://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/EsSalesOrderDataSet('dummy')/IsOrderHeader"
+            }
+          }
+        },
+        {
+          "__metadata": {
+            "id": "https://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/EsSalesOrderDataSet('1234')",
+            "uri": "https://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/EsSalesOrderDataSet('1234')",
+            "type": "ZCOD_SO_SIMULATE_SRV_01.EsSalesOrderData"
+          },
+          "Refobjkey": "1234",
+          "NetValHd": "85.330000000",
+          "GrossValHd": "93.860000000",
+          "TaxAmountHd": "8.530000000",
+          "CreditExposureAmt": "417293.3900",
+          "IsOrderHeader": {
+            "__deferred": {
+              "uri": "https://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/EsSalesOrderDataSet('1234')/IsOrderHeader"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

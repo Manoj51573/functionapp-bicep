@@ -1,0 +1,87 @@
+{
+  "__metadata": {
+    "id": "http://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/IsOrderHeaderSet('1234')",
+    "uri": "http://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/IsOrderHeaderSet('1234')",
+    "type": "ZCOD_SO_SIMULATE_SRV_01.IsOrderHeader"
+  },
+  "RefObjKey": "1234",
+  "DocType": "ZSOR",
+  "SalesOrg": "AU50",
+  "DistrChan": "DS",
+  "Division": "50",
+  "SalesOff": "",
+  "ReqDateH": "2025-05-01",
+  "PriceDate": "2025-05-01",
+  "PurchNoC": "",
+  "CurrIso": "AUD",
+  "ItOrderItemsSet": {
+    "results": [
+      {
+        "__metadata": {
+          "id": "http://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/ItOrderItemsSet(DocNumber='',ItmNumber='10')",
+          "uri": "http://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/ItOrderItemsSet(DocNumber='',ItmNumber='10')",
+          "type": "ZCOD_SO_SIMULATE_SRV_01.ItOrderItems"
+        },
+        "DocNumber": "",
+        "ItmNumber": "10",
+        "ReqQty": null,
+        "Material": "7104977",
+        "SalesUnit": "EA",
+        "NetPrice": null,
+        "Plant": "",
+        "NetValue": null,
+        "Currency": "",
+        "CondUnit": "",
+        "GST": null,
+        "TotalPriceIncGST": null,
+        "Discount": null
+      }
+    ]
+  },
+  "ItOrderPartnersSet": {
+    "results": [
+      {
+        "__metadata": {
+          "id": "http://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/ItOrderPartnersSet('1234')",
+          "uri": "http://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/ItOrderPartnersSet('1234')",
+          "type": "ZCOD_SO_SIMULATE_SRV_01.ItOrderPartners"
+        },
+        "RefObjKey": "1234",
+        "PartnRole": "AG",
+        "PartnNumb": "L012060",
+        "ItmNumber": "000000",
+        "PartnName": "",
+        "PartnCountry": ""
+      }
+    ]
+  },
+  "ItOrderSchedLinesSet": {
+    "results": [
+      {
+        "__metadata": {
+          "id": "http://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/ItOrderSchedLinesSet(RefObjKey='',ItmNumber='10')",
+          "uri": "http://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/ItOrderSchedLinesSet(RefObjKey='',ItmNumber='10')",
+          "type": "ZCOD_SO_SIMULATE_SRV_01.ItOrderSchedLines"
+        },
+        "RefObjKey": "",
+        "ItmNumber": "10",
+        "SchedLine": "0001",
+        "ReqDate": "2025-05-01",
+        "ReqQty": "1"
+      }
+    ]
+  },
+  "EsSalesOrderDataSet": {
+    "results": [
+      {
+        "__metadata": {
+          "id": "http://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/EsSalesOrderDataSet('dummy')",
+          "uri": "http://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/EsSalesOrderDataSet('dummy')",
+          "type": "ZCOD_SO_SIMULATE_SRV_01.EsSalesOrderData"
+        },
+        "Refobjkey": "dummy",
+        "CreditExposureAmt": "10"
+      }
+    ]
+  }
+}
