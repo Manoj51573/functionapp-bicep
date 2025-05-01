@@ -11,7 +11,7 @@
                         }
                     },
                     "method": "post",
-                    "path": "/subscriptions/@{encodeURIComponent('9921d38c-3739-4271-95f2-c09093ad87a4')}/resourcegroups/@{encodeURIComponent('EA-NonProd-DataInsights-RG')}/providers/Microsoft.DataFactory/factories/@{encodeURIComponent('dgit-npe-ase-ADF')}/pipelines/@{encodeURIComponent('ADLS csv_to_ADLS parquet')}/CreateRun",
+                    "path": "/subscriptions/@{encodeURIComponent(parameters('DataFactory_SubscriptionId'))}/resourcegroups/@{encodeURIComponent(parameters('DataFactory_ResourceGroup'))}/providers/Microsoft.DataFactory/factories/@{encodeURIComponent(parameters('DataFactory_Name'))}/pipelines/@{encodeURIComponent(parameters('DataFactoryPipeline1Name'))}/CreateRun",
                     "queries": {
                         "x-ms-api-version": "2017-09-01-preview"
                     }
@@ -61,7 +61,7 @@
                                 }
                             },
                             "method": "post",
-                            "path": "/subscriptions/@{encodeURIComponent('9921d38c-3739-4271-95f2-c09093ad87a4')}/resourcegroups/@{encodeURIComponent('EA-NonProd-DataInsights-RG')}/providers/Microsoft.DataFactory/factories/@{encodeURIComponent('dgit-npe-ase-ADF')}/pipelines/@{encodeURIComponent('PBI_Refresh_v1')}/CreateRun",
+                            "path": "/subscriptions/@{encodeURIComponent(parameters('DataFactory_SubscriptionId'))}/resourcegroups/@{encodeURIComponent(parameters('DataFactory_ResourceGroup'))}/providers/Microsoft.DataFactory/factories/@{encodeURIComponent(parameters('DataFactory_Name'))}/pipelines/@{encodeURIComponent(parameters('DataFactoryPipeline2Name'))}/CreateRun",
                             "queries": {
                                 "x-ms-api-version": "2017-09-01-preview"
                             }

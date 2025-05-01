@@ -117,7 +117,7 @@
                     }
                 },
                 "runAfter": {
-                    "Terminate": [
+                    "List_files_and_subfolders_in_a_folder": [
                         "SUCCEEDED"
                     ]
                 }
@@ -136,17 +136,6 @@
                 },
                 "runAfter": {
                     "Initialize_variables_FilesToStage": [
-                        "SUCCEEDED"
-                    ]
-                }
-            },
-            "Terminate": {
-                "type": "Terminate",
-                "inputs": {
-                    "runStatus": "Cancelled"
-                },
-                "runAfter": {
-                    "List_files_and_subfolders_in_a_folder": [
                         "SUCCEEDED"
                     ]
                 }

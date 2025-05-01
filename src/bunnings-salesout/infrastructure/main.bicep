@@ -11,11 +11,11 @@ param integrationSuffix string
 @description('Array of settings for Function App. Example = [{ name: \'WEBSITE_RUN_FROM_PACKAGE\' value: \'1\'}]')
 param logicAppSettings array = []
 
-@description('Hostname of the SFTP server. Example = \'sftp.example.com\'')
-param sftpHostName string
+// @description('Hostname of the SFTP server. Example = \'sftp.example.com\'')
+// param sftpHostName string
 
-@description('Root folder of the SFTP server. Example = \'/path/to/root\'')
-param sftpRootfolder string 
+// @description('Root folder of the SFTP server. Example = \'/path/to/root\'')
+// param sftpRootfolder string 
 
 @description('Name of the user for the file share. Example = \'domain\\username\'')
 param fileShareAccountName string
@@ -32,8 +32,8 @@ module configuration 'br/IntegrationModules:landing-zone:v3.0.1' = {
   }
 }
 
-var secretNameSftpUsername = '${env}-username-sftpfileserver'
-var secretNameSftpPassword = '${env}-userpwd-sftpfileserver'
+// var secretNameSftpUsername = '${env}-username-sftpfileserver'
+// var secretNameSftpPassword = '${env}-userpwd-sftpfileserver'
 
 var office365Connector= {
   name: 'office365'
@@ -45,16 +45,16 @@ var adfConnector= {
   displayName: 'adfConnector'
 }
 
-var sftpConnector = {
-  name: 'sftpConnector'
-  displayName: 'sftp-connector'
-  credentials : {
-    username: secretNameSftpUsername
-    password: secretNameSftpPassword
-  }
-  rootFolder: sftpRootfolder
-  hostName: sftpHostName
-}
+// var sftpConnector = {
+//   name: 'sftpConnector'
+//   displayName: 'sftp-connector'
+//   credentials : {
+//     username: secretNameSftpUsername
+//     password: secretNameSftpPassword
+//   }
+//   rootFolder: sftpRootfolder
+//   hostName: sftpHostName
+// }
 
 var azureStorageAccounts = {
   FileSystem: {
@@ -83,8 +83,8 @@ module mainDeployment 'br/IntegrationModules:pattern:v3.0.1' = {
       appSettings: logicAppSettings
       azureStorageAccounts : azureStorageAccounts
       office365Connector: office365Connector
-      sftpConnector: sftpConnector
-      //adfConnector: adfConnector
+      //sftpConnector: sftpConnector
+      adfConnector: adfConnector
     }
   }
 }

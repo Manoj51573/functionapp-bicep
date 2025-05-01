@@ -2,5 +2,25 @@
     "ADLS_NumberOfFilesToProcess": {
         "type": "String",
         "value": "@appsetting('ADLS_NumberOfFilesToProcess')"
+    },
+    "DataFactory_Name": {
+        "type": "String",
+        "value": "@appsetting('DataFactory_Name')"
+    },
+    "DataFactory_SubscriptionId": {
+        "type": "String",
+        "value": "@appsetting('DataFactory_SubscriptionId')"
+    },
+    "DataFactory_ResourceGroup": {
+        "type": "String",
+        "value": "@appsetting('DataFactory_ResourceGroup')"
+    },
+    "DataFactoryPipeline1Name": {
+        "type": "String",
+        "value": "@appsetting('DataFactoryPipeline1Name')"
+    },
+    "DataFactoryPipeline2Name": {
+        "type": "String",
+        "value": "@appsetting('DataFactoryPipeline2Name')"
     }
 }

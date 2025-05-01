@@ -49,7 +49,8 @@
                                     "parameters": {
                                         "containerName": "drop/Bunnings_SalesOut",
                                         "blobName": "@substring(item()?['name'],11,sub(length(item()?['name']),11))",
-                                        "content": "@body('Read_blob_content')?['content']"
+                                        "content": "@body('Read_blob_content')?['content']",
+                                        "overrideIfExists": "true"
                                     },
                                     "serviceProviderConfiguration": {
                                         "connectionName": "adls",

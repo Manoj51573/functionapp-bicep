@@ -383,7 +383,10 @@
                                     "id": "stageFilesToSapBw"
                                 }
                             },
-                            "body": "@body('List_all_the_blobs_using_path')?['blobs']"
+                            "body": "@body('List_all_the_blobs_using_path')?['blobs']",
+                            "retryPolicy": {
+                                "type": "none"
+                            }
                         },
                         "runAfter": {
                             "List_all_the_blobs_using_path": [
