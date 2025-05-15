@@ -1,5 +1,5 @@
 using Azure.Core;
-using dulux.integration.ecc.models.request;
+using dulux.integration.ecc.models.Request;
 using dulux.integration.ecc.models.response;
 using dulux.integration.ecc.pricing.Helper;
 using dulux.integration.ecc.services;
@@ -49,7 +49,7 @@ namespace GetPricing
         internal bool RequestMessageValid(string message, out string[] errors)
         {
             // Parse the request body
-            var request = System.Text.Json.JsonSerializer.Deserialize<GetPricingRequestPayload>(message, _jsonSerializerOptions);
+            var request = System.Text.Json.JsonSerializer.Deserialize<EccPricingRequest>(message, _jsonSerializerOptions);
 
             // Validate the request schema
             if (Validation.TrySchemaValidate(request, out List<ValidationResult> results) == false)
@@ -83,7 +83,7 @@ namespace GetPricing
                         return new BadRequestObjectResult(errors); //new ErrorResponse { Error = "Invalid Request" });
                     }
 
-                    var lookupRequest = JsonConvert.DeserializeObject<GetPricingRequestPayload>(requestBody);
+                    var lookupRequest = JsonConvert.DeserializeObject<EccPricingRequest>(requestBody);
 
                     if (lookupRequest == null)
                     {

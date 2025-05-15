@@ -1,8 +1,11 @@
 ﻿using dulux.integration.ecc.models.Configurations;
 using dulux.integration.ecc.models.request;
 using dulux.integration.ecc.models.request.xml;
+using dulux.integration.ecc.models.Request;
 using dulux.integration.ecc.models.response;
+using dulux.integration.ecc.models.Response;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,17 +30,19 @@ namespace dulux.integration.ecc.services
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<GetPricingResponsePayload> GetPrice(GetPricingRequestPayload pricingRequest)
+        public async Task<EccPricingResponse> GetPrice(EccPricingRequest pricingRequest)
         {
             var client = _httpClientFactory.CreateClient("ecc");
-            client.DefaultRequestHeaders.Add("Accept", "application/xml");
-
-            string xmlcontent = Serializer(ConvertToXmlEccPricingRequest(pricingRequest));
-
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+            // Serialize the pricingRequest object to JSON
+            string jsonContent = JsonConvert.SerializeObject(pricingRequest, Formatting.Indented);
+            // Create JSON StringContent
             using StringContent content = new(
-                xmlcontent,
-                Encoding.UTF8,
-            "application/xml");
+               jsonContent,
+               Encoding.UTF8,
+               "application/json"
+            );
+
 
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_option.Value.UserName}:{_option.Value.Password}")));
             var result = await client.PostAsync($"{_option.Value.BaseUrl}", content);
@@ -47,7 +52,10 @@ namespace dulux.integration.ecc.services
             {
                 responseString = await result.Content.ReadAsStringAsync();
             }
-            return ConvertPricingResponseToJson(responseString);
+            var response = System.Text.Json.JsonSerializer.Deserialize<EccPricingResponse>(responseString);
+
+            return response;
+            //return ConvertPricingResponseToJson(responseString);
         }
 
         public static string Serializer(object obj)
