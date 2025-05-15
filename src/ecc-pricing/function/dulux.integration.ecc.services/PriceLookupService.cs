@@ -34,6 +34,7 @@ namespace dulux.integration.ecc.services
         {
             var client = _httpClientFactory.CreateClient("ecc");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
+            client.DefaultRequestHeaders.Add("x-requested-with", "XMLHttpRequest");
             // Serialize the pricingRequest object to JSON
             string jsonContent = JsonConvert.SerializeObject(pricingRequest, Formatting.Indented);
             // Create JSON StringContent
