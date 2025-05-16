@@ -30,7 +30,7 @@ namespace dulux.integration.ecc.services
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<string> GetPrice(EccPricingRequest pricingRequest)
+        public async Task<GetPricingResponsePayload> GetPrice(EccPricingRequest pricingRequest)
         {
             var client = _httpClientFactory.CreateClient("ecc");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
@@ -53,10 +53,8 @@ namespace dulux.integration.ecc.services
             {
                 responseString = await result.Content.ReadAsStringAsync();
             }
-            var response = responseString;//System.Text.Json.JsonSerializer.Deserialize<EccPricingResponse>(responseString);
-
-            return response;
-            //return ConvertPricingResponseToJson(responseString);
+           
+            return ConvertPricingResponseToJson(responseString);
         }
 
         public static string Serializer(object obj)
