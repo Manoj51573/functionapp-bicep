@@ -145,7 +145,7 @@ namespace dulux.integration.ecc.models.Request
         public string ReqQty;
     }
 
-    public class EccPricingRequest
+    public class EccPricingRequest1
     {
         [JsonProperty("__metadata")]
         public Metadata __metadata;
@@ -191,6 +191,69 @@ namespace dulux.integration.ecc.models.Request
 
         [JsonProperty("EsSalesOrderDataSet")]
         public EsSalesOrderDataSet EsSalesOrderDataSet;
+    }
+
+
+
+
+
+
+
+
+
+
+
+    public class EccPricingRequest
+    {
+        [JsonProperty("DocType")]
+        public string DocType { get; set; }
+        [JsonProperty("DistrChan")]
+        public string DistrChan { get; set; }
+        [JsonProperty("Division")]
+        public string Division { get; set; }
+        [JsonProperty("SalesOrg")]
+        public string SalesOrg { get; set; }
+        [JsonProperty("ReqDateH")]
+        public string ReqDateH { get; set; }
+        [JsonProperty("PriceDate")]
+        public string PriceDate { get; set; }
+        [JsonProperty("CurrIso")]
+        public string CurrIso { get; set; }
+        [JsonProperty("SalesOff")]
+        public string SalesOff { get; set; }
+        [JsonProperty("ItOrderItemsSet")]
+        public List<ItOrderItem> ItOrderItemsSet { get; set; }
+        [JsonProperty("ItOrderPartnersSet")]
+        public List<ItOrderPartner> ItOrderPartnersSet { get; set; }
+        [JsonProperty("ItOrderSchedLinesSet")]
+        public List<ItOrderSchedLine> ItOrderSchedLinesSet { get; set; }
+    }
+    public class ItOrderItem
+    {
+        [JsonProperty("ItmNumber")]
+        public string ItmNumber { get; set; }
+        [JsonProperty("Material")]
+        public string Material { get; set; }
+        [JsonProperty("SalesUnit")]
+        public string SalesUnit { get; set; }
+    }
+    public class ItOrderPartner
+    {
+        [JsonProperty("PartnRole")]
+        public string PartnRole { get; set; }
+        [JsonProperty("PartnNumb")]
+        public string PartnNumb { get; set; }
+        [JsonProperty("ItmNumber")]
+        public string ItmNumber { get; set; }
+    }
+    public class ItOrderSchedLine
+    {
+        [JsonProperty("ItmNumber")]
+        public string ItmNumber { get; set; }
+        [JsonProperty("SchedLine")]
+        public string SchedLine { get; set; }
+        [JsonProperty("ReqQty")]
+        public string ReqQty { get; set; }
     }
 
 

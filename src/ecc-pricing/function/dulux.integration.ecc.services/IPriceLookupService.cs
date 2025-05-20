@@ -12,6 +12,6 @@ namespace dulux.integration.ecc.services
 {
     public interface IPriceLookupService
     {
-        Task<GetPricingResponsePayload> GetPrice(EccPricingRequest pricingRequest);
+        Task<EccPricingResponse> GetPrice(EccPricingRequest pricingRequest);
     }
 }
