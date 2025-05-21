@@ -23,21 +23,23 @@ namespace dulux.integration.ecc.services
     {
         private readonly IOptions<SapEccOption> _option;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly HttpClient _httpClient;
 
         public PriceLookupService(IOptions<SapEccOption> option, IHttpClientFactory httpClientFactory)
         {
             _option = option;
             _httpClientFactory = httpClientFactory;
+            _httpClient = _httpClientFactory.CreateClient("UnsafeClient");
         }
 
         public async Task<EccPricingResponse> GetPrice(EccPricingRequest pricingRequest)
         {
-            var client = _httpClientFactory.CreateClient("ecc");
-            client.DefaultRequestHeaders.Add("Accept", "application/json");
-            client.DefaultRequestHeaders.Add("x-requested-with", "XMLHttpRequest");
+            //var client = _httpClientFactory.CreateClient("ecc");
+            _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+            _httpClient.DefaultRequestHeaders.Add("x-requested-with", "XMLHttpRequest");
             // Serialize the pricingRequest object to JSON
             string jsonContent = JsonConvert.SerializeObject(pricingRequest, Formatting.Indented);
-            // Create JSON StringContent
+            
             using StringContent content = new(
                jsonContent,
                Encoding.UTF8,
@@ -45,8 +47,8 @@ namespace dulux.integration.ecc.services
             );
 
 
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_option.Value.UserName}:{_option.Value.Password}")));
-            var result = await client.PostAsync($"{_option.Value.BaseUrl}", content);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_option.Value.UserName}:{_option.Value.Password}")));
+            var result = await _httpClient.PostAsync($"{_option.Value.BaseUrl}", content);
             string responseString = string.Empty;
 
             if (result.IsSuccessStatusCode)
