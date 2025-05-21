@@ -18,10 +18,17 @@ builder.Services
    .AddOptions<SapEccOption>()
        .Configure<IConfiguration>((sapEccOption, configuration) =>
            configuration.GetSection(nameof(SapEccOption)).Bind(sapEccOption));
-builder.Services.AddHttpClient("UnsafeClient")
-   .ConfigurePrimaryHttpMessageHandler(() =>
-       new HttpClientHandler
-       {
-           ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-       });
+builder.Services.AddHttpClient("UnsafeClient", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(60); // Adjust as needed
+})
+.ConfigurePrimaryHttpMessageHandler(() =>
+{
+    return new HttpClientHandler
+    {
+        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+    };
+});
 builder.Build().Run();
+
+

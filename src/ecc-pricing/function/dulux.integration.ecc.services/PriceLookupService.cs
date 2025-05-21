@@ -4,6 +4,7 @@ using dulux.integration.ecc.models.request.xml;
 using dulux.integration.ecc.models.Request;
 using dulux.integration.ecc.models.response;
 using dulux.integration.ecc.models.Response;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
@@ -24,42 +25,54 @@ namespace dulux.integration.ecc.services
         private readonly IOptions<SapEccOption> _option;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly HttpClient _httpClient;
+        private readonly ILogger<PriceLookupService> _logger;
 
-        public PriceLookupService(IOptions<SapEccOption> option, IHttpClientFactory httpClientFactory)
+        public PriceLookupService(IOptions<SapEccOption> option, IHttpClientFactory httpClientFactory, ILogger<PriceLookupService> logger)
         {
             _option = option;
             _httpClientFactory = httpClientFactory;
             _httpClient = _httpClientFactory.CreateClient("UnsafeClient");
+            _logger = logger;
         }
 
         public async Task<EccPricingResponse> GetPrice(EccPricingRequest pricingRequest)
         {
-            //var client = _httpClientFactory.CreateClient("ecc");
-            _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-            _httpClient.DefaultRequestHeaders.Add("x-requested-with", "XMLHttpRequest");
-            _httpClient.Timeout = TimeSpan.FromSeconds(30);
-            // Serialize the pricingRequest object to JSON
-            string jsonContent = JsonConvert.SerializeObject(pricingRequest, Formatting.Indented);
-            
-            using StringContent content = new(
-               jsonContent,
-               Encoding.UTF8,
-               "application/json"
-            );
-
-
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_option.Value.UserName}:{_option.Value.Password}")));
-            var result = await _httpClient.PostAsync($"{_option.Value.BaseUrl}", content);
-            string responseString = string.Empty;
-
-            if (result.IsSuccessStatusCode)
+            try
             {
-                responseString = await result.Content.ReadAsStringAsync();
-            }
+                //var client = _httpClientFactory.CreateClient("ecc");
+                _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+                _httpClient.DefaultRequestHeaders.Add("x-requested-with", "XMLHttpRequest");
+                // Serialize the pricingRequest object to JSON
+                string jsonContent = JsonConvert.SerializeObject(pricingRequest, Formatting.Indented);
 
-             //return ConvertPricingResponseToJson(json);
-            var lookupRequest = JsonConvert.DeserializeObject<EccPricingResponse>(responseString);
-            return lookupRequest;
+                using StringContent content = new(
+                   jsonContent,
+                   Encoding.UTF8,
+                   "application/json"
+                );
+
+                _logger.LogInformation("Calling SAP at {Url}", _option.Value.BaseUrl);
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_option.Value.UserName}:{_option.Value.Password}")));
+                var result = await _httpClient.PostAsync($"{_option.Value.BaseUrl}", content);
+                string responseString = string.Empty;
+
+                if (result.IsSuccessStatusCode)
+                {
+                    responseString = await result.Content.ReadAsStringAsync();
+                }
+
+                //return ConvertPricingResponseToJson(json);
+                _logger.LogInformation("SAP response: {Response}", responseString);
+                var lookupRequest = JsonConvert.DeserializeObject<EccPricingResponse>(responseString);
+                return lookupRequest;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error calling SAP endpoint");
+                throw;
+            }
+            
         }
 
         public static string Serializer(object obj)
