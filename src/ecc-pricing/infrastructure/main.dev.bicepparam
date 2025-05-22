@@ -30,7 +30,7 @@ param functionAppSettings = [
   }
   {
     name: 'SapEccOption:BaseUrl'
-    value: 'https://apim-ae-dulux-001.azure-api.net/integration/pricing/v1/get-price'
+    value: 'https://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/IsOrderHeaderSet?sap-client=010'
   }
   {
     name: 'SapEccOption:UserName'

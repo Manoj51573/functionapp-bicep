@@ -31,7 +31,7 @@ namespace dulux.integration.ecc.services
         {
             _option = option;
             _httpClientFactory = httpClientFactory;
-            _httpClient = _httpClientFactory.CreateClient("UnsafeClient");
+            _httpClient = _httpClientFactory.CreateClient("ecc");
             _logger = logger;
         }
 
