@@ -4,6 +4,7 @@ using dulux.integration.ecc.models.request.xml;
 using dulux.integration.ecc.models.Request;
 using dulux.integration.ecc.models.response;
 using dulux.integration.ecc.models.Response;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
@@ -23,39 +24,55 @@ namespace dulux.integration.ecc.services
     {
         private readonly IOptions<SapEccOption> _option;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly HttpClient _httpClient;
+        private readonly ILogger<PriceLookupService> _logger;
 
-        public PriceLookupService(IOptions<SapEccOption> option, IHttpClientFactory httpClientFactory)
+        public PriceLookupService(IOptions<SapEccOption> option, IHttpClientFactory httpClientFactory, ILogger<PriceLookupService> logger)
         {
             _option = option;
             _httpClientFactory = httpClientFactory;
+            _httpClient = _httpClientFactory.CreateClient("ecc");
+            _logger = logger;
         }
 
         public async Task<EccPricingResponse> GetPrice(EccPricingRequest pricingRequest)
         {
-            var client = _httpClientFactory.CreateClient("ecc");
-            client.DefaultRequestHeaders.Add("Accept", "application/json");
-            client.DefaultRequestHeaders.Add("x-requested-with", "XMLHttpRequest");
-            // Serialize the pricingRequest object to JSON
-            string jsonContent = JsonConvert.SerializeObject(pricingRequest, Formatting.Indented);
-            
-            using StringContent content = new(
-               jsonContent,
-               Encoding.UTF8,
-               "application/json"
-            );
-
-
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_option.Value.UserName}:{_option.Value.Password}")));
-            var result = await client.PostAsync($"{_option.Value.BaseUrl}", content);
-            string responseString = string.Empty;
-
-            if (result.IsSuccessStatusCode)
+            try
             {
-                responseString = await result.Content.ReadAsStringAsync();
+                //var client = _httpClientFactory.CreateClient("ecc");
+                _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+                _httpClient.DefaultRequestHeaders.Add("x-requested-with", "XMLHttpRequest");
+                // Serialize the pricingRequest object to JSON
+                string jsonContent = JsonConvert.SerializeObject(pricingRequest, Formatting.Indented);
+
+                using StringContent content = new(
+                   jsonContent,
+                   Encoding.UTF8,
+                   "application/json"
+                );
+
+                _logger.LogInformation("Calling SAP at {Url}", _option.Value.BaseUrl);
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_option.Value.UserName}:{_option.Value.Password}")));
+                var result = await _httpClient.PostAsync($"{_option.Value.BaseUrl}", content);
+                string responseString = string.Empty;
+
+                if (result.IsSuccessStatusCode)
+                {
+                    responseString = await result.Content.ReadAsStringAsync();
+                }
+
+                //return ConvertPricingResponseToJson(json);
+                _logger.LogInformation("SAP response: {Response}", responseString);
+                var lookupRequest = JsonConvert.DeserializeObject<EccPricingResponse>(responseString);
+                return lookupRequest;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error calling SAP endpoint");
+                throw;
             }
 
-            var lookupRequest = JsonConvert.DeserializeObject<EccPricingResponse>(responseString);
-            return lookupRequest;
         }
 
         public static string Serializer(object obj)
@@ -83,9 +100,9 @@ namespace dulux.integration.ecc.services
                     CondUnit = item.CondUnit,
                     DocNumber = item.DocNumber,
                     Material = item.Material,
-                    ReqQty = item.ReqQty == 0? "" : item.ReqQty.ToString(),
+                    ReqQty = item.ReqQty == 0 ? "" : item.ReqQty.ToString(),
                     Currency = item.Currency,
-                    Discount = item.Discount == 0? "" : item.Discount.ToString(),
+                    Discount = item.Discount == 0 ? "" : item.Discount.ToString(),
                     ItmNumber = item.ItmNumber.ToString(),
                     GST = item.GST == 0 ? "" : item.GST.ToString(),
                     NetPrice = item.NetPrice == 0 ? "" : item.NetPrice.ToString(),
@@ -132,10 +149,11 @@ namespace dulux.integration.ecc.services
                     EsSalesOrderDataSet = lookupRequest.EsSalesOrderDataSet == null ? new models.request.xml.EsSalesOrderDataSet { EsSalesOrderData = new models.request.xml.EsSalesOrderData { Refobjkey = "dummy", CreditExposureAmt = "10" } } : new models.request.xml.EsSalesOrderDataSet { EsSalesOrderData = new models.request.xml.EsSalesOrderData { Refobjkey = lookupRequest.EsSalesOrderDataSet.EsSalesOrderData.Refobjkey, CreditExposureAmt = lookupRequest.EsSalesOrderDataSet.EsSalesOrderData.CreditExposureAmt, GrossValHd = lookupRequest.EsSalesOrderDataSet.EsSalesOrderData.GrossValHd, NetValHd = lookupRequest.EsSalesOrderDataSet.EsSalesOrderData.NetValHd, TaxAmountHd = lookupRequest.EsSalesOrderDataSet.EsSalesOrderData.TaxAmountHd } },
                     ItOrderItemsSet = new models.request.xml.ItOrderItemsSet { ItOrderItems = itOrderItems },
                     ItOrderPartnersSet = new models.request.xml.ItOrderPartnersSet { ItOrderPartners = itOrderPartners },
-                    ItOrderSchedLinesSet = new models.request.xml.ItOrderSchedLinesSet { ItOrderSchedLines = itOrderSchedLines } }
+                    ItOrderSchedLinesSet = new models.request.xml.ItOrderSchedLinesSet { ItOrderSchedLines = itOrderSchedLines }
+                }
             };
         }
-          
+
         internal GetPricingResponsePayload ConvertPricingResponseToJson(string responseString)
         {
             var serializer = new XmlSerializer(typeof(XmlEccPricingResponse));
