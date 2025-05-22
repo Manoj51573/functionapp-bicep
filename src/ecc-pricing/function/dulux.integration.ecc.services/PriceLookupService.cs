@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -30,7 +31,7 @@ namespace dulux.integration.ecc.services
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<EccPricingResponse> GetPrice(EccPricingRequest pricingRequest)
+        public async Task<GetPricingResponsePayload> GetPrice(EccPricingRequest pricingRequest)
         {
             var client = _httpClientFactory.CreateClient("ecc");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
@@ -54,9 +55,8 @@ namespace dulux.integration.ecc.services
                 responseString = await result.Content.ReadAsStringAsync();
             }
 
-            //return ConvertPricingResponseToJson(json);
             var lookupRequest = JsonConvert.DeserializeObject<EccPricingResponse>(responseString);
-            return lookupRequest;
+            return ConvertPricingResponseToJson(lookupRequest);
         }
 
         public static string Serializer(object obj)
@@ -138,48 +138,51 @@ namespace dulux.integration.ecc.services
             };
         }
 
-        internal GetPricingResponsePayload ConvertPricingResponseToJson(string responseString)
+        internal GetPricingResponsePayload ConvertPricingResponseToJson(EccPricingResponse responseString)
         {
-            var serializer = new XmlSerializer(typeof(XmlEccPricingResponse));
-            using TextReader reader = new StringReader(responseString);
-            var rawResponse = (XmlEccPricingResponse?)serializer.Deserialize(reader);
-
             var response = new GetPricingResponsePayload();
-            if (rawResponse != null)
+            if (responseString != null)
             {
-                var index = rawResponse.IsOrderHeader?.EsSalesOrderDataSet?.EsSalesOrderData.FindIndex(x => x.Refobjkey.Equals(rawResponse.IsOrderHeader.RefObjKey)) ?? 0;
-
-                response.RefObjKey = rawResponse.IsOrderHeader.RefObjKey;
-                response.PriceDate = rawResponse.IsOrderHeader.PriceDate;
-                response.ReqDateH = rawResponse.IsOrderHeader.ReqDateH;
+                response.RefObjKey = responseString.d.RefObjKey;
+                response.PriceDate = responseString.d.PriceDate;
+                response.ReqDateH = responseString.d.ReqDateH;
                 response.ItOrderItemsSet = new List<models.response.ItOrderItem>();
-                response.EsSalesOrderDataSet = new models.response.EsSalesOrderData
+                response.EsSalesOrderDataSet = new List<models.response.EsSalesOrderData>();
+                if (responseString.d.EsSalesOrderDataSet.results!=null)
                 {
-                    CreditExposureAmt = rawResponse.IsOrderHeader?.EsSalesOrderDataSet?.EsSalesOrderData[index].CreditExposureAmt.ToString(),
-                    GrossValHd = rawResponse.IsOrderHeader?.EsSalesOrderDataSet?.EsSalesOrderData[index].GrossValHd,
-                    NetValHd = rawResponse.IsOrderHeader?.EsSalesOrderDataSet?.EsSalesOrderData[index].NetValHd,
-                    Refobjkey = rawResponse.IsOrderHeader?.EsSalesOrderDataSet?.EsSalesOrderData[index].Refobjkey,
-                    TaxAmountHd = rawResponse.IsOrderHeader?.EsSalesOrderDataSet?.EsSalesOrderData[index].TaxAmountHd
-                };
-
-                foreach (var item in rawResponse.IsOrderHeader.ItOrderItemsSet.ItOrderItems)
-                {
-                    response.ItOrderItemsSet.Add(new models.response.ItOrderItem
+                    foreach (var item in responseString.d.EsSalesOrderDataSet.results)
                     {
-                        DocNumber = item.DocNumber,
-                        ItmNumber = item.ItmNumber,
-                        ReqQty = item.ReqQty.ToString(),
-                        Material = item.Material,
-                        SalesUnit = item.SalesUnit,
-                        NetPrice = item.NetPrice.ToString(),
-                        Plant = item.Plant,
-                        NetValue = item.NetValue.ToString(),
-                        Currency = item.Currency,
-                        CondUnit = item.CondUnit,
-                        GST = item.GST.ToString(),
-                        TotalPriceIncGST = item.TotalPriceIncGST.ToString(),
-                        Discount = item.Discount
-                    });
+                        response.EsSalesOrderDataSet.Add(new models.response.EsSalesOrderData
+                        {
+                            CreditExposureAmt = item.CreditExposureAmt,
+                            GrossValHd = item.GrossValHd,
+                            NetValHd = item.NetValHd,
+                            Refobjkey = item.Refobjkey,
+                            TaxAmountHd = item.TaxAmountHd
+                        });
+                    }
+                }
+                if (responseString.d.ItOrderItemsSet.results != null)
+                {
+                    foreach (var item in responseString.d.ItOrderItemsSet.results)
+                    {
+                        response.ItOrderItemsSet.Add(new models.response.ItOrderItem
+                        {
+                            DocNumber = item.DocNumber,
+                            ItmNumber = item.ItmNumber,
+                            ReqQty = item.ReqQty.ToString(),
+                            Material = item.Material,
+                            SalesUnit = item.SalesUnit,
+                            NetPrice = item.NetPrice.ToString(),
+                            Plant = item.Plant,
+                            NetValue = item.NetValue.ToString(),
+                            Currency = item.Currency,
+                            CondUnit = item.CondUnit,
+                            GST = item.GST.ToString(),
+                            TotalPriceIncGST = item.TotalPriceIncGST.ToString(),
+                            Discount = item.Discount
+                        });
+                    }
                 }
             }
 

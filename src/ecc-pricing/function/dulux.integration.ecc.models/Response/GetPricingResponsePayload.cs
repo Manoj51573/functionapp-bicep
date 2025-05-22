@@ -29,7 +29,7 @@ namespace dulux.integration.ecc.models.response
         [JsonPropertyName("ItOrderItemsSet")] 
         public List<ItOrderItem> ItOrderItemsSet { get; set; }
         [JsonPropertyName("EsSalesOrderDataSet")] 
-        public EsSalesOrderData EsSalesOrderDataSet { get; set; }
+        public List<EsSalesOrderData> EsSalesOrderDataSet { get; set; }
     }
 
 
