@@ -29,10 +29,6 @@ param functionAppSettings = [
     value: 'kv-ae-ais-dev-apim'
   }
   {
-    name: 'WEBSITE_LOAD_ROOT_CERTIFICATES'
-    value: '0711D93AE6571FE44BB6D53C41222CCC1A439DF7'
-  }
-  {
     name: 'SapEccOption:BaseUrl'
     // value: 'https://apim-ae-dulux-001.azure-api.net/integration/pricing/v1/get-price'
     value: 'https://auazmelqod2.duluxgroup.net:1443/sap/opu/odata/sap/ZCOD_SO_SIMULATE_SRV_01/IsOrderHeaderSet?sap-client=010'
