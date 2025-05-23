@@ -11,6 +11,9 @@ param integrationSuffix string
 @description('Array of settings for Function App. Example = [{ name: \'WEBSITE_RUN_FROM_PACKAGE\' value: \'1\'}]')
 param functionAppSettings array = []
 
+@description('Array of public certificates to be used in the Function App. Example = [{ name: \'cert1\' value: \'cert1Value\'}]')
+param publicCerts array = []
+
 // Integration Landing Zone Configuration
 module configuration 'br/IntegrationModules:landing-zone:v3.0.1' = {
   name: 'configuration'
@@ -33,6 +36,7 @@ module mainDeployment 'br/IntegrationModules:pattern:v3.0.1' = {
       name: 'func-ae-ais-${env}-${integrationSuffix}'
       appServicePlan: landingZone.appServiceName
       appSettings: functionAppSettings
+      publicCerts: publicCerts
       workerRuntime: 'dotnet-isolated'
       workerVersion: 'v8.0'
     }
