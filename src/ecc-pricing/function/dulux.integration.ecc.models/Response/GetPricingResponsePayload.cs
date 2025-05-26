@@ -31,7 +31,7 @@ namespace dulux.integration.ecc.models.response
         [JsonPropertyName("EsSalesOrderDataSet")] 
         public List<EsSalesOrderData> EsSalesOrderDataSet { get; set; }
         [JsonPropertyName("Error Message")]
-        public String  ErrorMessage { get; set; }
+        public String  ErrorMessage { get; set; }= "";
         [JsonPropertyName("Error Details")]
         public ErrorObject Error { get; set; }
     }
