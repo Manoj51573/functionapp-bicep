@@ -30,6 +30,10 @@ namespace dulux.integration.ecc.models.response
         public List<ItOrderItem> ItOrderItemsSet { get; set; }
         [JsonPropertyName("EsSalesOrderDataSet")] 
         public List<EsSalesOrderData> EsSalesOrderDataSet { get; set; }
+        [JsonPropertyName("Error Message")]
+        public String  ErrorMessage { get; set; }
+        [JsonPropertyName("Error Details")]
+        public ErrorObject Error { get; set; }
     }
 
 
@@ -76,4 +80,39 @@ namespace dulux.integration.ecc.models.response
         [JsonPropertyName("CreditExposureAmt")] 
         public string CreditExposureAmt { get; set; }
     }
+
+
+
+    public class ErrorMessage
+{
+   public string Lang { get; set; }
+   public string Value { get; set; }
+}
+public class ErrorResolution
+{
+   public string SAP_Transaction { get; set; }
+   public string SAP_Note { get; set; }
+}
+public class Application
+{
+   public string Component_Id { get; set; }
+   public string Service_Namespace { get; set; }
+   public string Service_Id { get; set; }
+   public string Service_Version { get; set; }
+}
+public class InnerError
+{
+   public Application Application { get; set; }
+   public string TransactionId { get; set; }
+   public string Timestamp { get; set; }
+   public ErrorResolution Error_Resolution { get; set; }
+   public List<object> ErrorDetails { get; set; }
+}
+public class ErrorObject
+{
+   public string Code { get; set; }
+   public ErrorMessage Message { get; set; }
+   public InnerError InnerError { get; set; }
+}
+
 }

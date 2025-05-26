@@ -36,29 +36,32 @@ namespace dulux.integration.ecc.services
             var client = _httpClientFactory.CreateClient("ecc");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
             client.DefaultRequestHeaders.Add("x-requested-with", "XMLHttpRequest");
-            // Serialize the pricingRequest object to JSON
+            // Serialize request to JSON
             string jsonContent = JsonConvert.SerializeObject(pricingRequest, Formatting.Indented);
-            // Create JSON StringContent
-            using StringContent content = new(
-               jsonContent,
-               Encoding.UTF8,
-               "application/json"
+            using var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+            // Basic Auth
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                "Basic",
+                Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_option.Value.UserName}:{_option.Value.Password}"))
             );
-
-
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_option.Value.UserName}:{_option.Value.Password}")));
-            var result = await client.PostAsync($"{_option.Value.BaseUrl}", content);
-            string responseString = string.Empty;
+            var result = await client.PostAsync(_option.Value.BaseUrl, content);
+            var responseString = await result.Content.ReadAsStringAsync();
 
             if (result.IsSuccessStatusCode)
             {
-                responseString = await result.Content.ReadAsStringAsync();
+                var lookupRequest = JsonConvert.DeserializeObject<EccPricingResponse>(responseString);
+                return ConvertPricingResponseToJson(lookupRequest);
             }
-
-            var lookupRequest = JsonConvert.DeserializeObject<EccPricingResponse>(responseString);
-            return ConvertPricingResponseToJson(lookupRequest);
+            else
+            {
+                GetPricingResponsePayload lookupErrorRequest = null;
+                lookupErrorRequest = JsonConvert.DeserializeObject<GetPricingResponsePayload>(responseString);
+                return new GetPricingResponsePayload
+                {
+                    ErrorMessage = lookupErrorRequest?.Error?.Message?.Value ?? "Unknown error",
+                };
+            }
         }
-
         public static string Serializer(object obj)
         {
             var serializer = new XmlSerializer(obj.GetType());
@@ -148,7 +151,7 @@ namespace dulux.integration.ecc.services
                 response.ReqDateH = responseString.d.ReqDateH;
                 response.ItOrderItemsSet = new List<models.response.ItOrderItem>();
                 response.EsSalesOrderDataSet = new List<models.response.EsSalesOrderData>();
-                if (responseString.d.EsSalesOrderDataSet.results!=null)
+                if (responseString.d.EsSalesOrderDataSet.results != null)
                 {
                     foreach (var item in responseString.d.EsSalesOrderDataSet.results)
                     {
