@@ -68,7 +68,7 @@ jobs:
           dotnet test -c ${{env.CONFIGURATION}} --no-restore --no-build --verbosity normal --logger trx --results-directory "${{ env.TEST_RESULTS_FOLDER }}" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
 
       - name: Generate test report
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v2
         with:
           name: test_results
           path: '${{ env.TEST_RESULTS_FOLDER }}/*.trx'
