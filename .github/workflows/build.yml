@@ -124,7 +124,7 @@ jobs:
         run: dotnet test --configuration ${{ env.configuration }} --no-restore --no-build --verbosity normal --logger trx --results-directory "TestResults-${{ env.dotnet_version }}" /p:CollectCoverage=true
           
       - name: Generate test report
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v2
         if: ${{ inputs.run_tests }}
         with:
           name: test_results
