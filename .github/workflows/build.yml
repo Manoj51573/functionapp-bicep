@@ -50,7 +50,7 @@ jobs:
   #     #labels: Linux # Allows to run on any self-hosted runner with the label 'Linux'
   #   steps:
   #   - name: Checkout
-  #     uses: actions/checkout@v4
+  #     uses: actions/checkout@v5
 
   #   - name: Install Tools
   #     uses: ./.github/actions/install-tools-linux
@@ -68,7 +68,7 @@ jobs:
     if: inputs.build_infra
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: PSRule >> Infrastructure
         if: ${{ inputs.run_tests }}
@@ -111,7 +111,7 @@ jobs:
       checks: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Restore dependencies
         run: dotnet restore
@@ -152,7 +152,7 @@ jobs:
       logicapp_artifact_name: 'logicapp'
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Easy Zip Files
         uses: vimtor/action-zip@v1
