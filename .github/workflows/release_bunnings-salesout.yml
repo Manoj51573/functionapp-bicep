@@ -29,7 +29,7 @@ jobs:
       integration_name_folder: ${{ steps.integration.outputs.integration_name_folder }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         
       - name: Check for changes in paths src/${{env.integration_name_folder}}/
         uses: dorny/paths-filter@v3
