@@ -101,7 +101,7 @@ jobs:
     steps:
       - name: Download ${{ inputs.infrastructure_artifact_name }} artifact
         if: inputs.update_infra
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: ${{ inputs.infrastructure_artifact_name }}
 
@@ -139,7 +139,7 @@ jobs:
       
       - name: Download ${{ inputs.functionapp_artifact_name }} artifact
         if: inputs.update_func
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: ${{ inputs.functionapp_artifact_name }}
           path: output
@@ -154,7 +154,7 @@ jobs:
       
       - name: Download ${{ inputs.logicapp_artifact_name }} artifact
         if: ${{ inputs.update_logic }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: ${{ inputs.logicapp_artifact_name }}
           path: ${{ env.download_folder }}
